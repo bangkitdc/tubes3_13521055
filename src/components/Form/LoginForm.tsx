@@ -4,6 +4,7 @@ import { AxiosError } from "axios";
 import { loginUser } from "../../helpers";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Link from "next/link";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -92,12 +93,12 @@ const LoginForm = () => {
 
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Don&rsquo;t have an account?{" "}
-                <a
+                <Link
                   href="/signup"
                   className="font-medium text-primary-600 hover:underline dark:text-primary-500"
                 >
                   Create an account
-                </a>
+                </Link>
               </p>
             </form>
           </div>

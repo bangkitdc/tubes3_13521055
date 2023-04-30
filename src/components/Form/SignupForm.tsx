@@ -5,6 +5,7 @@ import axios, { AxiosError } from "axios";
 import { loginUser } from "@/helpers";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Link from "next/link";
 
 const SignupForm = () => {
   const [data, setData] = useState({
@@ -162,7 +163,7 @@ const SignupForm = () => {
               </button>
 
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                Already have account? <a href="/login" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Log in</a>
+                Already have account? <Link href="/login" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Log in</Link>
               </p>
             </form>
           </div>
