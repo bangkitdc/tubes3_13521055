@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/** Fonts */
+@font-face {
+  font-family: 'Archivo';
+  src: url('/font/Archivo-Black.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Helvetica';
+  src: url('/font/Helvetica.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Varela Round';
+  src: url('/font/VarelaRound-Regular.ttf') format('truetype');
+}
