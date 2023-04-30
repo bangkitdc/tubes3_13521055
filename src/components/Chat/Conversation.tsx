@@ -1,10 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
-
-interface Message {
-  text: string;
-  role: 'user' | 'bot';
-}
+import Messages from './Messages';
 
 const Conversation = (): JSX.Element => {
   const router = useRouter();
@@ -24,7 +20,7 @@ const Conversation = (): JSX.Element => {
   function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (currentMessage !== '') {
-      setUserMessages([...userMessages, {  text: currentMessage, role: 'user' }]);
+      setUserMessages([...userMessages, { text: currentMessage, role: 'user' }]);
     }
     setCurrentMessage('');
     sendMessage();
@@ -46,7 +42,7 @@ const Conversation = (): JSX.Element => {
       });
 
       const data = await response.json();
-      setBotMessages([...botMessages, {  text: data.response, role: 'bot' }]);
+      setBotMessages([...botMessages, { text: data.response, role: 'bot' }]);
     } catch (error) {
       console.error(error);
       alert('An error occurred while sending the message.');
@@ -73,46 +69,27 @@ const Conversation = (): JSX.Element => {
     }
   }, [userMessages, botMessages, lastDisplayedUserMessageIndex, lastDisplayedBotMessageIndex]);
 
-  const renderedMessages: JSX.Element[] = [];
-
-  for (let i = 0; i < userMessages.length || i < botMessages.length; i++) {
-    if (i <= lastDisplayedUserMessageIndex && i < userMessages.length) {
-      renderedMessages.push(
-        <div key={`user-${i}`} className="message-user right">
-          <div className="bg-red-400 rounded-lg p-2">{userMessages[i].text}</div>
-        </div>
-      );
-    }
-    if (i <= lastDisplayedBotMessageIndex && i < botMessages.length) {
-      renderedMessages.push(
-        <div key={`bot-${i}`} className="message-bot left">
-          <div className="bg-blue-300 rounded-lg p-2">{botMessages[i].text}</div>
-        </div>
-      );
-    }
-  }
-  
-    return (
-      <div className='wrapper h-full'>
-      <div className="conversation flex-1 flex flex-col">
-        <div className="message-user flex flex-col" ref={userMessagesRef}>
-          {renderedMessages}
-        </div>
+  return (
+    <div className="conversation flex flex-col h-full grid grid-rows-10 gap-5">
+      <div className="messages flex-grow-1 flex flex-col row-span-9" ref={userMessagesRef}>
+        <Messages userMessages={userMessages} botMessages={botMessages} lastDisplayedUserMessageIndex={lastDisplayedUserMessageIndex} lastDisplayedBotMessageIndex={lastDisplayedBotMessageIndex}/>
+        <div ref={botMessagesRef} />
       </div>
-      <div className="inputchat">
-        <form className="prompt flex" onSubmit={handleFormSubmit}>
+        <div className="inputchat mt-auto row-span-1">
+          <form className="prompt flex" onSubmit={handleFormSubmit}>
             <input
               id="message-input"
               type="text"
               value={currentMessage}
               onChange={handleInputChange}
               placeholder="Type your message"
-              className="flex-1 rounded-full py-2 px-4 bg-yellow-400 text-black focus:outline-none"
+              className="flex-1 rounded-full py-2 px-4 dark:bg-gray-600 dark:border-gray-700 text-white focus:outline-none"
             />
-            <button type='submit' className="ml-2 py-2 px-4 bg-yellow-400 rounded-full text-black font-bold">Send</button>
-        </form>
+            <button type='submit' className="ml-2 py-2 px-4 dark:bg-gray-600 dark:border-gray-700 rounded-full text-white font-bold hover:bg-gray-400">Send</button>
+          </form>
+        </div>
       </div>
-    </div>    
+ 
     );
   };  
   
