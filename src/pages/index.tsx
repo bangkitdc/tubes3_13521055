@@ -1,6 +1,7 @@
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import Conversation from '../components/Chat/Conversation'
 
 
 export default function Home() {
@@ -20,6 +21,9 @@ export default function Home() {
     <>
       <div>
         <h1>Welcome to the home page!</h1>
+        <div>
+          <Conversation/>
+          </div>
       </div>
     </>
   );
