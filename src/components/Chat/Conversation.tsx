@@ -6,20 +6,33 @@ import { useSession } from 'next-auth/react';
 
 interface Message {
   text: string;
-  role: 'user' | 'bot';
+  role: string;
+  room: number;
 }
 
-const Conversation = (): JSX.Element => {
+interface ConversationProps {
+  selectedAlgorithm: string;
+  data: Message[];
+}
+
+const Conversation = ({ selectedAlgorithm, data }: ConversationProps): JSX.Element => {
   const router = useRouter();
   const { id } = router.query;
+
+  const [userMessagesHistory, setUserMessagesHistory] = useState<Message[]>([]);
+  const [botMessagesHistory, setBotMessagesHistory] = useState<Message[]>([]);
   const [userMessages, setUserMessages] = useState<Message[]>([]);
   const [botMessages, setBotMessages] = useState<Message[]>([]);
   const [currentMessage, setCurrentMessage] = useState<string>('');
+
   const userMessagesRef = useRef<HTMLDivElement>(null);
   const botMessagesRef = useRef<HTMLDivElement>(null);
+
+  const [lastDisplayedUserMessageIndexHistory, setLastDisplayedUserMessageIndexHistory] = useState<number>(-1);
+  const [lastDisplayedBotMessageIndexHistory, setLastDisplayedBotMessageIndexHistory] = useState<number>(-1);
   const [lastDisplayedUserMessageIndex, setLastDisplayedUserMessageIndex] = useState<number>(-1);
   const [lastDisplayedBotMessageIndex, setLastDisplayedBotMessageIndex] = useState<number>(-1);
-
+  const [dataAdded, setDataAdded] = useState<boolean>(false);
   const { data: session }: any = useSession();
   
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -29,7 +42,19 @@ const Conversation = (): JSX.Element => {
   function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (currentMessage !== '') {
-      setUserMessages([...userMessages, { text: currentMessage, role: 'user' }]);
+      setUserMessages([...userMessages, { text: currentMessage, role: 'sender' , room: 1}]);
+      // Switch statement to select appropriate response
+      let response = '';
+      // switch (selectedAlgorithm) {
+      //   case 'algorithm1':
+      //     alert('Response from kmp');
+      //     break;
+      //   case 'algorithm2':
+      //     alert('Response from bm');
+      //     break;
+      //   default:
+      //     alert('haha ga mencet lu');
+      // }
     }
     setCurrentMessage('');
     sendMessage();
@@ -46,13 +71,29 @@ const Conversation = (): JSX.Element => {
         "/api/data/qna"
       );
       if (apiRes?.data?.success) {
-        setBotMessages([...botMessages, { text: apiRes.data.messages[0].answer, role: 'bot' }]);
+        setBotMessages([...botMessages, { text: apiRes.data.messages[0].answer, role: 'receiver' , room: 1}]);
       }
     } catch (error) {
       console.error(error);
       alert('An error occurred while sending the message.');
     }
   };
+
+  // ini misah dummy data ke user sm bot
+  useEffect(() => {
+    const userMsg: Message[] = [];
+    const botMsg: Message[] = [];
+    data.forEach((d) => {
+      if (d.role === "sender") {
+        userMsg.push(d);
+      } else {
+        botMsg.push(d);
+      }
+    });
+    setUserMessagesHistory(userMsg);
+    setBotMessagesHistory(botMsg);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   useEffect(() => {
     const userMessagesElement = userMessagesRef.current;
@@ -63,7 +104,17 @@ const Conversation = (): JSX.Element => {
     if (botMessagesElement) {
       botMessagesElement.scrollIntoView({ behavior: "smooth" });
     }
+    
   }, [userMessages, botMessages]);
+
+  useEffect(() => {
+    if (userMessagesHistory.length > lastDisplayedUserMessageIndexHistory) {
+      setLastDisplayedUserMessageIndexHistory(userMessagesHistory.length);
+    }
+    if (botMessagesHistory.length > lastDisplayedBotMessageIndexHistory) {
+      setLastDisplayedBotMessageIndexHistory(botMessagesHistory.length);
+    }
+  }, [userMessagesHistory, botMessagesHistory, lastDisplayedUserMessageIndexHistory, lastDisplayedBotMessageIndexHistory]);
 
   useEffect(() => {
     if (userMessages.length > lastDisplayedUserMessageIndex) {
@@ -87,10 +138,18 @@ const Conversation = (): JSX.Element => {
         ref={userMessagesRef}
       >
         <Messages
+          userMessages={userMessagesHistory}
+          botMessages={botMessagesHistory}
+          lastDisplayedUserMessageIndex={lastDisplayedUserMessageIndexHistory}
+          lastDisplayedBotMessageIndex={lastDisplayedBotMessageIndexHistory}
+          history={true}
+        />
+        <Messages
           userMessages={userMessages}
           botMessages={botMessages}
           lastDisplayedUserMessageIndex={lastDisplayedUserMessageIndex}
           lastDisplayedBotMessageIndex={lastDisplayedBotMessageIndex}
+          history={false}
         />
         <div ref={botMessagesRef} />
       </div>

@@ -13,3 +13,9 @@ export interface QnAParams {
     question: string;
     answer: string;
 }
+
+export interface Message {
+    text: string;
+    role: string;
+    room: number;
+}

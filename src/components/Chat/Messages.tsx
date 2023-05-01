@@ -1,11 +1,13 @@
 import React from 'react';
 import Typewriter, { TypewriterClass } from 'typewriter-effect';
+import { Message } from '@/types';
 
 type Props = {
   userMessages: Message[];
   botMessages: Message[];
   lastDisplayedUserMessageIndex: number;
   lastDisplayedBotMessageIndex: number;
+  history: boolean;
 };
 
 const Messages: React.FC<Props> = ({
@@ -13,6 +15,7 @@ const Messages: React.FC<Props> = ({
   botMessages,
   lastDisplayedUserMessageIndex,
   lastDisplayedBotMessageIndex,
+  history
 }) => {
   const renderedMessages: JSX.Element[] = [];
   
@@ -37,7 +40,11 @@ const Messages: React.FC<Props> = ({
       renderedMessages.push(
         <div key={`bot-${i}`} className="message-bot left p-4">
           <div className="bg-sky-700 text-stone-50 rounded-lg p-2">
-            <Typewriter
+            {history && 
+              botMessages[i].text
+            }
+            {!history && 
+              <Typewriter
               onInit={handleInit}
               options={{
                 autoStart:false,
@@ -45,6 +52,7 @@ const Messages: React.FC<Props> = ({
                 cursor: ""
               }}
             />
+            }
           </div>
         </div>
       );
