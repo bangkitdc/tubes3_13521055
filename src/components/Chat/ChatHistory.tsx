@@ -1,7 +1,9 @@
 import Link from 'next/link';
-import { useRouter } from 'next/router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Conversation from './Conversation';
+import axios, { AxiosError } from 'axios';
+import { useSession } from 'next-auth/react';
+import { toast } from "react-toastify";
 
 interface Chat {
     label: string;
@@ -11,6 +13,8 @@ interface Chat {
     const [chatData, setChatData] = useState<Chat[]>([]);
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('');
     const [selectedChat, setSelectedChat] = useState<string | null>();
+
+    const { data: session }: any = useSession();
   
     const addChat = () => {
       setChatData([...chatData, { label: `Chat ${chatData.length + 1}` }]);
@@ -24,15 +28,26 @@ interface Chat {
       setSelectedAlgorithm(event.target.value);
     };
 
-    // pass ke conversation
-    const dummyConversation = [
-      { text: 'Hello!', role: 'receiver', room: 2 },
-      { text: 'Hi there!', role: 'sender', room: 2 },
-      { text: 'How are you?', role: 'sender', room: 2 },
-      { text: 'I am doing well, thank you. How about you?', role: 'receiver', room: 2 },
-      { text: 'I am good too!', role: 'sender', room: 2 },
-      { text: 'That\'s great to hear.', role: 'receiver', room: 2 }
-    ];
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const senderId :string = session?.user?._id;
+          const apiEndpoint = `/api/chat/message?senderId=${senderId}`;
+          const apiRes = await axios.get(apiEndpoint);
+          const data = apiRes.data.messages;
+          setData(data);
+        } catch (error: unknown) {
+          if (error instanceof AxiosError) {
+            const errorMsg = error.response?.data?.error;
+            toast.error(errorMsg);
+          }
+        }
+      };
+      fetchData();
+    }, [session?.user?._id])
+    
 
   return (
     <div className='grid grid-cols-5 h-screen w-screen bg-gray-50 dark:bg-gray-900'>
@@ -93,7 +108,7 @@ interface Chat {
           </div>
         </div>
       <div className="col-span-4">
-        <Conversation selectedAlgorithm={selectedAlgorithm} data={dummyConversation}/>
+        <Conversation selectedAlgorithm={selectedAlgorithm} data={data}/>
       </div>
     </div>
     

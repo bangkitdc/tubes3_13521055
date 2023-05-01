@@ -17,7 +17,6 @@ interface ConversationProps {
 
 const Conversation = ({ selectedAlgorithm, data }: ConversationProps): JSX.Element => {
   const router = useRouter();
-  const { id } = router.query;
 
   const [userMessagesHistory, setUserMessagesHistory] = useState<Message[]>([]);
   const [botMessagesHistory, setBotMessagesHistory] = useState<Message[]>([]);
@@ -33,7 +32,6 @@ const Conversation = ({ selectedAlgorithm, data }: ConversationProps): JSX.Eleme
   const [lastDisplayedUserMessageIndex, setLastDisplayedUserMessageIndex] = useState<number>(-1);
   const [lastDisplayedBotMessageIndex, setLastDisplayedBotMessageIndex] = useState<number>(-1);
   const [dataAdded, setDataAdded] = useState<boolean>(false);
-  const { data: session }: any = useSession();
   
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     setCurrentMessage(event.target.value);
@@ -134,7 +132,7 @@ const Conversation = ({ selectedAlgorithm, data }: ConversationProps): JSX.Eleme
   return (
     <div className="conversation flex flex-col gap-2 py-5 h-screen">
       <div
-        className="messages flex-grow-1 flex flex-col px-5 row-span-9 scrolled-chat"
+        className="messages flex-grow-1 flex flex-col pl-5 px-1 row-span-9 overflow-y-scroll"
         ref={userMessagesRef}
       >
         <Messages
