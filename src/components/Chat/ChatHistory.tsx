@@ -21,7 +21,7 @@ interface Chat {
           Add New Chat
         </div>
         <div className="max-h-96 w-full overflow-y-scroll">
-          {chatData.map((chat) => (
+          {chatData.slice().reverse().map((chat) => (
             <div
               className="chat-label py-3 px-8 border-2 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-400 rounded-lg text-white font-bold mb-3 w-full flex justify-center"
               key={chat.label}
