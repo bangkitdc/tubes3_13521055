@@ -27,7 +27,7 @@ export default function Home() {
           <div className="col-span-1 py-5 pl-5 pr-2 dark:bg-gray-800">
             <ChatHistory />
           </div>
-          <div className="col-span-4 p-5 overscroll-y-contain">
+          <div className="col-span-4">
             <Conversation />
           </div>
         </div>

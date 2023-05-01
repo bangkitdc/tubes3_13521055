@@ -27,14 +27,17 @@ interface Chat {
           Add New Chat
         </div>
         <div className="max-h-96 w-full overflow-y-scroll">
-          {chatData.slice().reverse().map((chat) => (
-            <div
-              className="chat-label py-3 px-8 border-2 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-400 rounded-lg text-white font-bold mb-3 w-full flex justify-center"
-              key={chat.label}
-            >
-              <Link href="/">{chat.label}</Link>
-            </div>
-          ))}
+          {chatData
+            .slice()
+            .reverse()
+            .map((chat) => (
+              <div
+                className="chat-label py-3 px-8 border-2 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-400 rounded-lg text-white font-bold mb-3 w-full flex justify-center cursor-pointer"
+                key={chat.label}
+              >
+                <Link href="/">{chat.label}</Link>
+              </div>
+            ))}
         </div>
         <div className="mt-auto mr-[20px] w-[208px]">
           <ul className="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-800 dark:text-white">
@@ -66,7 +69,7 @@ interface Chat {
                   onChange={() => handleAlgorithmChange()}
                 />
                 <label className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                  BM{" "}
+                  BM
                 </label>
               </div>
             </li>

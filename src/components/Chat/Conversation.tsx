@@ -21,7 +21,7 @@ const Conversation = (): JSX.Element => {
   const [lastDisplayedBotMessageIndex, setLastDisplayedBotMessageIndex] = useState<number>(-1);
 
   const { data: session }: any = useSession();
-
+  
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     setCurrentMessage(event.target.value);
   }
@@ -58,19 +58,19 @@ const Conversation = (): JSX.Element => {
     const userMessagesElement = userMessagesRef.current;
     const botMessagesElement = botMessagesRef.current;
     if (userMessagesElement) {
-      userMessagesElement.scrollIntoView()
+      userMessagesElement.scrollIntoView({ behavior: "smooth" });
     }
     if (botMessagesElement) {
-      botMessagesElement.scrollIntoView()
+      botMessagesElement.scrollIntoView({ behavior: "smooth" });
     }
   }, [userMessages, botMessages]);
 
   useEffect(() => {
     if (userMessages.length > lastDisplayedUserMessageIndex) {
-      setLastDisplayedUserMessageIndex(userMessages.length - 1);
+      setLastDisplayedUserMessageIndex(userMessages.length);
     }
     if (botMessages.length > lastDisplayedBotMessageIndex) {
-      setLastDisplayedBotMessageIndex(botMessages.length - 1);
+      setLastDisplayedBotMessageIndex(botMessages.length);
     }
   }, [userMessages, botMessages, lastDisplayedUserMessageIndex, lastDisplayedBotMessageIndex]);
 
@@ -81,9 +81,9 @@ const Conversation = (): JSX.Element => {
   }, []);
 
   return (
-    <div className="conversation flex-col h-full grid grid-rows-10 gap-5">
+    <div className="conversation flex flex-col gap-2 py-5 h-screen">
       <div
-        className="messages flex-grow-1 flex flex-col row-span-9 scrolled-chat"
+        className="messages flex-grow-1 flex flex-col px-5 row-span-9 scrolled-chat"
         ref={userMessagesRef}
       >
         <Messages
@@ -94,7 +94,7 @@ const Conversation = (): JSX.Element => {
         />
         <div ref={botMessagesRef} />
       </div>
-      <div className="inputchat mt-auto row-span-1">
+      <div className="inputchat mt-auto row-span-1 border-t-2 pt-5 px-5 border-gray-800">
         <form className="prompt flex" onSubmit={handleFormSubmit}>
           <input
             id="message-input"
