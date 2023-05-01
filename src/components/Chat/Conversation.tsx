@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
+import axios from 'axios';
 
 interface Message {
   text: string;
@@ -37,16 +38,19 @@ const Conversation = (): JSX.Element => {
     input.value = '';
 
     try {
-      const response = await fetch('/api/chatbot/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text }),
-      });
-
-      const data = await response.json();
-      setBotMessages([...botMessages, {  text: data.response, role: 'bot' }]);
+      // const response = await fetch('/api/chatbot/', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ text }),
+      // });
+      const apiRes = await axios.get(
+        "/api/data/qna"
+      );
+      if (apiRes?.data?.success) {
+        setBotMessages([...botMessages, { text: apiRes.data.messages[0].answer, role: 'bot' }]);
+      }
     } catch (error) {
       console.error(error);
       alert('An error occurred while sending the message.');
