@@ -58,10 +58,10 @@ const Conversation = (): JSX.Element => {
     const userMessagesElement = userMessagesRef.current;
     const botMessagesElement = botMessagesRef.current;
     if (userMessagesElement) {
-      userMessagesElement.scrollTop = userMessagesElement.scrollHeight;
+      userMessagesElement.scrollIntoView()
     }
     if (botMessagesElement) {
-      botMessagesElement.scrollTop = botMessagesElement.scrollHeight;
+      botMessagesElement.scrollIntoView()
     }
   }, [userMessages, botMessages]);
 
@@ -83,7 +83,7 @@ const Conversation = (): JSX.Element => {
   return (
     <div className="conversation flex-col h-full grid grid-rows-10 gap-5">
       <div
-        className="messages flex-grow-1 flex flex-col row-span-9"
+        className="messages flex-grow-1 flex flex-col row-span-9 scrolled-chat"
         ref={userMessagesRef}
       >
         <Messages
