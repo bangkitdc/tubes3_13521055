@@ -11,6 +11,12 @@ interface Chat {
     const addChat = () => {
       setChatData([...chatData, { label: `Chat ${chatData.length + 1}` }]);
     };
+
+    const handleAlgorithmChange = () => {
+      setAlgorithm(algorithm == 0 ? 1 : 0);
+    };
+
+    const [algorithm, setAlgorithm] = useState(0);
   return (
     <div className=" h-full w-full">
       <div className="flex flex-col w-full h-full items-center">
@@ -40,7 +46,8 @@ interface Chat {
                   name="algorithm"
                   value="algorithm1"
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 cursor-pointer"
-                  checked
+                  checked={algorithm == 0}
+                  onChange={() => handleAlgorithmChange()}
                 />
                 <label className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
                   KMP
@@ -55,6 +62,8 @@ interface Chat {
                   name="algorithm"
                   value="algorithm2"
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 cursor-pointer"
+                  checked={algorithm == 1}
+                  onChange={() => handleAlgorithmChange()}
                 />
                 <label className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
                   BM{" "}

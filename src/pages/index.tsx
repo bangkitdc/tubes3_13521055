@@ -1,6 +1,6 @@
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Conversation from '../components/Chat/Conversation'
 import ChatHistory from '../components/Chat/ChatHistory'
 
@@ -17,6 +17,8 @@ export default function Home() {
     };
     checkSession();
   }, [router]);
+
+  const [data, setData] = useState(null);
 
   return (
     <>

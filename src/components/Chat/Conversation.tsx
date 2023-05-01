@@ -104,6 +104,7 @@ const Conversation = (): JSX.Element => {
             placeholder="Send a message."
             className="flex-1 rounded-lg py-2.5 pb-[11px] px-4 text-sm font-medium dark:bg-gray-800 dark:border-gray-900 text-stone-50 focus:outline-none"
             ref={callbackRef}
+            autoComplete="off"
           />
           <button
             type="submit"

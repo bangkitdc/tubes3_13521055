@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { AxiosError } from "axios";
 import { loginUser } from "../../helpers";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 
@@ -31,17 +31,19 @@ const LoginForm = () => {
       if (loginRes && !loginRes.ok) {
         toast.error(loginRes.error);
       } else {
-        router.push("/");
         toast.success("Log in successful");
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        router.push("/");
       }
     } catch (error) {
       if (error instanceof AxiosError) {
         const errorMsg = error.response?.data?.error;
         toast.error(errorMsg);
       }
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -104,43 +106,6 @@ const LoginForm = () => {
           </div>
         </div>
       </div>
-      <ToastContainer />
-      {/* <Container>
-        <AppLogoTitle />
-        <Form onSubmit={handleLogin}>
-          <FormTitle> Login </FormTitle>
-
-          <InputFeild
-            placeholder="Email"
-            type="email"
-            icon={<AiOutlineMail />}
-            value={email}
-            onChange={handleEmailChange}
-            required
-          />
-
-          <InputFeild
-            placeholder="Password"
-            type="password"
-            icon={<AiOutlineUnlock />}
-            value={password}
-            onChange={handlePasswordChange}
-            required
-          />
-
-          <Link href="/forgot-password">Forgot Password?</Link>
-
-          <Button type="submit" title="Login" disabled={loading} />
-
-          {submitError && <ErrorText>{submitError}</ErrorText>}
-
-          <InfoTextContainer>
-            <InfoText>New User?</InfoText>
-
-            <Link href="/signup">Create an Account</Link>
-          </InfoTextContainer>
-        </Form>
-      </Container> */}
     </>
   );
 };
