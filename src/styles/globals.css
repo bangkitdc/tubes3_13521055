@@ -99,9 +99,11 @@
   align-items: flex-start;
 }
 
-
-
-
-
-
-
+.test {
+  overflow-y: auto;
+  max-height: 700px;
+}
+.test2 {
+  overflow-y: auto;
+  max-height: 750px;
+}
