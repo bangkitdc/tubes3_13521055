@@ -88,7 +88,7 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
   const sendMessage = async () => {
     try {
       const apiRes = await axios.get(
-        "/api/data/qna"
+        `/api/data/qna?string=${currentMessage}`
       );
       if (apiRes?.data?.success) {
         const dataPost: Message = {

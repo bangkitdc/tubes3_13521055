@@ -59,7 +59,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
   } else if (req.method === "GET") {
     try {
-        const qnas = await QnA.find();
+        const string = req.query.string; // ini pertanyaan dari pengguna
+
+        const qnas = await QnA.find(); // ini data yang didapet dari database ada di bawah contohnya
 
         /*
           {
@@ -101,6 +103,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             success: true,
             qnas // ini diganti ya
         });
+
+        // nah tapi ini belom bisa dipake di main nya kalo mau console.log aja tapi return nya tetep qnas (biar gaerror)
     } catch (error) {
         if (error instanceof mongoose.Error.ValidationError) {
           for (let field in error.errors) {
