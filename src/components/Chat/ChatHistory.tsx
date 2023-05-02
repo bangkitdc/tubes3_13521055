@@ -12,35 +12,93 @@ interface Chat {
   const ChatHistory: React.FC = () => {
     const [chatData, setChatData] = useState<Chat[]>([]);
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('algorithm1');
-    const [selectedChat, setSelectedChat] = useState<string | null>();
-
+    const [room, setRoom] = useState(-1);
+    const [dataPost, setDataPost] = useState<Message[]>([]);
+    const [allRooms, setAllRoom] = useState<number[]>();
+    const [data, setData] = useState<Message[]>([]);
     const { data: session }: any = useSession();
 
+     // klo pake ini dia ngebug garagara labelnya bisa ga unik jadi kek doble2 berkali2
+    // const addChat = () => {
+    //   setChatData([...chatData, { label: `Chat ${chatData.length + 1}` }]);
+    // };
+
+    // tapi kayanya kalo api ga pake ini deh (pakenya yg atas) tp sok maneh coba
     const addChat = () => {
-      setChatData([...chatData, { label: `Chat ${chatData.length + 1}` }]);
+      let newLabel = `Chat ${chatData.length + 1}`;
+      
+      // Check if label already exists in chatData
+      while (chatData.some(chat => chat.label === newLabel)) {
+        newLabel = `Chat ${parseInt(newLabel.split(' ')[1]) + 1}`;
+      }
+    
+      setChatData([...chatData, { label: newLabel }]);
+    };
+
+    const convertToNumber = (label: string): number => {
+      const chatNumber = label.split(' ')[1]; // split the string by space and get the second part
+      return parseInt(chatNumber);
     };
 
     const handleChatClick = (label: string) => {
-      setSelectedChat(label);
-      // setRoom()
+      const chatNumber = convertToNumber(label);
+      setRoom(chatNumber);
     };
+
+    useEffect(() => {
+      const temp: Message[] = [];
+      for (const message of data){
+        if(message.room === room){
+          temp.push(message);
+        }
+      }
+      setDataPost(temp);
+    }, [room, dataPost]);
 
     const handleAlgorithmChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       setSelectedAlgorithm(event.target.value);
     };
 
-    const [data, setData] = useState([]);
-    const [dataPost, setDataPost] = useState([]);
-
-    const [room, setRoom] = useState(1);
-
     useEffect(() => {
       const fetchData = async () => {
         try {
+          // const senderId :string = session?.user?._id;
+          // const apiEndpoint = `/api/chat/message?senderId=${senderId}`;
+          // const apiRes = await axios.get(apiEndpoint);
+          // const data = apiRes.data.messages;
           const senderId :string = session?.user?._id;
           const apiEndpoint = `/api/chat/message?senderId=${senderId}`;
           const apiRes = await axios.get(apiEndpoint);
-          const data = apiRes.data.messages;
+          const data: Message[] = [
+            { text: 'Hello!', role: 'receiver', room: 5 , sender: '!'},
+            { text: 'Hi there!', role: 'sender', room: 4 , sender: '!'},
+            { text: 'How are you?', role: 'sender', room: 8 , sender: '!'},
+            { text: 'I am doing well, thank you. How about you?', role: 'receiver', room: 2 , sender: '!'},
+            { text: 'I am good too!', role: 'sender', room: 3, sender: '!' },
+            { text: 'That\'s great to hear.', role: 'receiver', room: 4 , sender: '!'}
+          ];
+          const uniqueRooms: number[] = [];
+
+          for (const message of data) {
+            if (!uniqueRooms.includes(message.room)) {
+              uniqueRooms.push(message.room);
+            }
+          }
+
+          // switch (chatData.length) {
+          //   case 4:
+          //     alert('4');
+          //     break;
+          //   case 5:
+          //     alert('5');
+          //     break;
+          //   default:
+          //     alert(chatData.length);
+          // }    
+
+          const newChatData = uniqueRooms.map((room) => ({ label: `Chat ${room}`}));
+          setChatData(newChatData);
+          setAllRoom(uniqueRooms);
           setData(data);
         } catch (error: unknown) {
           if (error instanceof AxiosError) {
@@ -52,23 +110,24 @@ interface Chat {
       fetchData();
     }, [session?.user?._id]);
 
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const senderId: string = session?.user?._id;
-          const apiEndpoint = `/api/chat/message?senderId=${senderId}&roomNumber=${room}`;
-          const apiRes = await axios.get(apiEndpoint);
-          const data = apiRes.data.messages;
-          setDataPost(data);
-        } catch (error: unknown) {
-          if (error instanceof AxiosError) {
-            const errorMsg = error.response?.data?.error;
-            toast.error(errorMsg);
-          }
-        }
-      };
-      fetchData();
-    }, [room, session?.user?._id]);
+    //sori aing komen biar bisa jalan pake dummy dulu
+    // useEffect(() => {
+    //   const fetchData = async () => {
+    //     try {
+    //       const senderId: string = session?.user?._id;
+    //       const apiEndpoint = `/api/chat/message?senderId=${senderId}&roomNumber=${room}`;
+    //       const apiRes = await axios.get(apiEndpoint);
+    //       const data = apiRes.data.messages;
+    //       setDataPost(data);
+    //     } catch (error: unknown) {
+    //       if (error instanceof AxiosError) {
+    //         const errorMsg = error.response?.data?.error;
+    //         toast.error(errorMsg);
+    //       }
+    //     }
+    //   };
+    //   fetchData();
+    // }, [room, session?.user?._id]);
     
 
   return (
