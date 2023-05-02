@@ -1,9 +1,7 @@
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import Conversation from '../components/Chat/Conversation'
+import { useEffect } from "react";
 import ChatHistory from '../components/Chat/ChatHistory'
-
 
 export default function Home() {
   const router = useRouter();
@@ -13,12 +11,17 @@ export default function Home() {
       const session = await getSession();
       if (!session) {
         router.push("/login");
+      } else {
+        const expires = Date.parse(session.expires);
+        const currentTime = Date.now();
+        if (expires < currentTime) {
+          // token has expired, redirect to login page
+          router.push("/login");
+        }
       }
     };
     checkSession();
   }, [router]);
-
-  const [data, setData] = useState(null);
 
   return (
     <>

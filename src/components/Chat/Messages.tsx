@@ -8,6 +8,7 @@ type Props = {
   lastDisplayedUserMessageIndex: number;
   lastDisplayedBotMessageIndex: number;
   history: boolean;
+  onMessageReady: () => void;
 };
 
 const Messages: React.FC<Props> = ({
@@ -15,7 +16,8 @@ const Messages: React.FC<Props> = ({
   botMessages,
   lastDisplayedUserMessageIndex,
   lastDisplayedBotMessageIndex,
-  history
+  history,
+  onMessageReady
 }) => {
   const renderedMessages: JSX.Element[] = [];
   
@@ -34,6 +36,9 @@ const Messages: React.FC<Props> = ({
         typewriter
           .pauseFor(500)
           .typeString(botMessages[i].text)
+          .callFunction(() => {
+            onMessageReady();
+          })
           .start();
       };
 

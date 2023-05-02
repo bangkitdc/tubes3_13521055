@@ -61,7 +61,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const senderId = req.query.senderId;
         const roomNumber = req.query.roomNumber;
 
-        const messages = await Message.find({ sender: senderId, room: roomNumber });
+        let messages;
+        if (roomNumber) {
+          messages = await Message.find({ sender: senderId, room: roomNumber });
+        } else {
+          messages = await Message.find({ sender: senderId });
+        }
+
         return res.status(200).json({
             success: true,
             messages

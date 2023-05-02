@@ -59,10 +59,47 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
   } else if (req.method === "GET") {
     try {
-        const messages = await QnA.find();
+        const qnas = await QnA.find();
+
+        /*
+          {
+            "success": true,
+            "messages": [
+                {
+                    "_id": "644ea2d391a4f18cd687d143",
+                    "question": "Hello",
+                    "answer": "Hello, how can I help you today?",
+                    "__v": 0
+                },
+                {
+                    "_id": "644ea37c91a4f18cd687d148",
+                    "question": "Who are you?",
+                    "answer": "I am boleeehhh, an AI model chatbot that can assist you in generating human-like responses to their question and provide information.",
+                    "__v": 0
+                }
+            ]
+        }
+
+        qnas kayak gini ngaksesnya brarti qnas.messages (ini return array of object)
+        */
+
+        // ALGORITMA DISINI NANTI RETURN YANG DI BAWAH DIGANTI YA
+        // misal res = hasilnya nah tapi kalo bisa si messagesnya yg di return
+        // kek messages[0] gitu
+        // tapi kalo misal mau banyak kek yang milih terdekat juga gapapa
+        // bikin aja yang penting returnya object
+        // contoh
+        /*
+        res = {
+          string="ITB adalah ...."; itu qnas yang dibawah diganti
+        }
+
+        sama coba cari cara biar dia bisa newline gitu gatau kalo string naro "\n" bisa apa gak
+
+        */
         return res.status(200).json({
             success: true,
-            messages
+            qnas // ini diganti ya
         });
     } catch (error) {
         if (error instanceof mongoose.Error.ValidationError) {

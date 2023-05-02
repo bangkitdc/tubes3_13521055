@@ -4,6 +4,7 @@ import axios, { AxiosError } from 'axios';
 import Messages from './Messages';
 import { toast } from 'react-toastify';
 import { useSession } from 'next-auth/react';
+import Message from '@/models/message';
 
 interface Message {
   sender: string;
@@ -19,6 +20,7 @@ interface ConversationProps {
 }
 
 const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX.Element => {
+  
   const router = useRouter();
 
   const [userMessagesHistory, setUserMessagesHistory] = useState<Message[]>([]);
@@ -29,12 +31,14 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
 
   const userMessagesRef = useRef<HTMLDivElement>(null);
   const botMessagesRef = useRef<HTMLDivElement>(null);
+  const botMessagesRef2 = useRef<HTMLDivElement>(null);
 
   const [lastDisplayedUserMessageIndexHistory, setLastDisplayedUserMessageIndexHistory] = useState<number>(-1);
   const [lastDisplayedBotMessageIndexHistory, setLastDisplayedBotMessageIndexHistory] = useState<number>(-1);
   const [lastDisplayedUserMessageIndex, setLastDisplayedUserMessageIndex] = useState<number>(-1);
   const [lastDisplayedBotMessageIndex, setLastDisplayedBotMessageIndex] = useState<number>(-1);
-  const [dataAdded, setDataAdded] = useState<boolean>(false);
+
+  const [readyToEnter, setReadyToEnter] = useState(true);
   
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     setCurrentMessage(event.target.value);
@@ -42,49 +46,65 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
   
   const { data: session }: any = useSession();
 
+  useEffect(() => {
+    setTimeout(() => {
+      const botMessagesElement = botMessagesRef2.current;
+      if (botMessagesElement) {
+        botMessagesElement.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 1000);
+  }, []);
+
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (currentMessage !== '') {
-      // Switch statement to select appropriate response
-      setUserMessages([...userMessages, {
+
+    if (currentMessage !== '' && readyToEnter) {
+      setReadyToEnter(false);
+
+      const dataPost: Message = {
         sender: session?.user._id,
         room: room,
         role: "sender",
         text: currentMessage,
-      }]);
+      };
+      setUserMessages([...userMessages, dataPost]);
       try {
-        const apiRes = await axios.post("/api/chat/message", {
-          sender: session?.user._id,
-          room: room,
-          role: "sender",
-          text: currentMessage,
-        });
+        const apiRes = await axios.post("/api/chat/message", dataPost);
         if (apiRes?.data?.success) {
+          
         }
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
           const errorMsg = error.response?.data?.error;
           toast.error(errorMsg);
         }
+      } finally {
+        setCurrentMessage("");
+        sendMessage();
       }
     }
-    setCurrentMessage('');
-    sendMessage();
   }
 
   const sendMessage = async () => {
-    const input = document.getElementById('message-input') as HTMLInputElement;
-    const text = input.value;
-    if (!text) return;
-    input.value = '';
-
     try {
       const apiRes = await axios.get(
         "/api/data/qna"
       );
       if (apiRes?.data?.success) {
-        setBotMessages([...botMessages, { sender:apiRes.data.messages[0].sender , text: apiRes.data.messages[0].answer, role: 'receiver' , room: 1}]);
+        const dataPost: Message = {
+          sender: session?.user._id,
+          room: room,
+          role: "receiver",
+          text: apiRes.data.messages[0].answer,
+        };
+        setBotMessages([...botMessages, dataPost]);
+        
+        const apiPost = await axios.post("/api/chat/message", dataPost);
+        if (apiPost?.data?.success) {
+
+        }
       }
+
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
         const errorMsg = error.response?.data?.error;
@@ -119,7 +139,7 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
       botMessagesElement.scrollIntoView({ behavior: "smooth" });
     }
     
-  }, [userMessages, botMessages]);
+  }, [userMessages, botMessages, readyToEnter]);
 
   useEffect(() => {
     if (userMessagesHistory.length > lastDisplayedUserMessageIndexHistory) {
@@ -145,6 +165,10 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
     }
   }, []);
 
+  const handleMessageReady = () => {
+    setReadyToEnter(true);
+  };
+
   return (
     <div className="conversation flex flex-col gap-2 py-5 h-screen">
       <div
@@ -157,13 +181,16 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
           lastDisplayedUserMessageIndex={lastDisplayedUserMessageIndexHistory}
           lastDisplayedBotMessageIndex={lastDisplayedBotMessageIndexHistory}
           history={true}
+          onMessageReady={handleMessageReady}
         />
+        <div ref={botMessagesRef2} />
         <Messages
           userMessages={userMessages}
           botMessages={botMessages}
           lastDisplayedUserMessageIndex={lastDisplayedUserMessageIndex}
           lastDisplayedBotMessageIndex={lastDisplayedBotMessageIndex}
           history={false}
+          onMessageReady={handleMessageReady}
         />
         <div ref={botMessagesRef} />
       </div>
