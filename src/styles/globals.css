@@ -99,11 +99,6 @@
   align-items: flex-start;
 }
 
-.scrolled-chat{
-  overflow-y: auto;
-  max-height: 750px;
-}
-
 /* custom scrollbar */
 ::-webkit-scrollbar {
   width: 20px;

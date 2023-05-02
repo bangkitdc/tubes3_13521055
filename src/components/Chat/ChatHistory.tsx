@@ -11,17 +11,18 @@ interface Chat {
   
   const ChatHistory: React.FC = () => {
     const [chatData, setChatData] = useState<Chat[]>([]);
-    const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('');
+    const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('algorithm1');
     const [selectedChat, setSelectedChat] = useState<string | null>();
 
     const { data: session }: any = useSession();
-  
+
     const addChat = () => {
       setChatData([...chatData, { label: `Chat ${chatData.length + 1}` }]);
     };
 
     const handleChatClick = (label: string) => {
       setSelectedChat(label);
+      // setRoom()
     };
 
     const handleAlgorithmChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,6 +30,17 @@ interface Chat {
     };
 
     const [data, setData] = useState([]);
+    const [dataPost, setDataPost] = useState([]);
+
+    const [room, setRoom] = useState(1);
+
+    // ini buat room
+    // useEffect(() => {
+    //   setRoom((prevRoom) => ({
+    //     ...prevRoom,
+    //     room: 1,
+    //   }));
+    // }, []);
 
     useEffect(() => {
       const fetchData = async () => {
@@ -46,7 +58,25 @@ interface Chat {
         }
       };
       fetchData();
-    }, [session?.user?._id])
+    }, [session?.user?._id]);
+
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const senderId: string = session?.user?._id;
+          const apiEndpoint = `/api/chat/message?senderId=${senderId}&roomNumber=${room}`;
+          const apiRes = await axios.get(apiEndpoint);
+          const data = apiRes.data.messages;
+          setDataPost(data);
+        } catch (error: unknown) {
+          if (error instanceof AxiosError) {
+            const errorMsg = error.response?.data?.error;
+            toast.error(errorMsg);
+          }
+        }
+      };
+      fetchData();
+    }, [room, session?.user?._id]);
     
 
   return (
@@ -108,7 +138,7 @@ interface Chat {
           </div>
         </div>
       <div className="col-span-4">
-        <Conversation selectedAlgorithm={selectedAlgorithm} data={data}/>
+        <Conversation selectedAlgorithm={selectedAlgorithm} data={dataPost} room={room}/>
       </div>
     </div>
     

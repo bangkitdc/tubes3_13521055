@@ -10,11 +10,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (!req.body) {
       return res.status(400).json({ error: "Data is missing" });
     }
-    const { sender, room, role, text, timestamps } = req.body;
+    const { sender, room, role, text } = req.body;
 
-    const messageExists = await Message.find({ sender });
+    // const messageExists = await Message.find({ sender });
 
-    if (messageExists.length >= 2) {
+    if (false) {
       return res.status(409).json({ error: "Message already exists" });
     } else {
       if (text.length < 1) {
@@ -28,8 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           sender,
           room,
           role,
-          text,
-          timestamps
+          text
         });
 
         const message = {
@@ -60,7 +59,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } else if (req.method === "GET") {
     try {
         const senderId = req.query.senderId;
-        const messages = await Message.find({ sender: senderId });
+        const roomNumber = req.query.roomNumber;
+
+        const messages = await Message.find({ sender: senderId, room: roomNumber });
         return res.status(200).json({
             success: true,
             messages

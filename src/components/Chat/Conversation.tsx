@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import Messages from './Messages';
+import { toast } from 'react-toastify';
 import { useSession } from 'next-auth/react';
 
 interface Message {
+  sender: string;
   text: string;
   role: string;
   room: number;
@@ -13,9 +15,10 @@ interface Message {
 interface ConversationProps {
   selectedAlgorithm: string;
   data: Message[];
+  room: number;
 }
 
-const Conversation = ({ selectedAlgorithm, data }: ConversationProps): JSX.Element => {
+const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX.Element => {
   const router = useRouter();
 
   const [userMessagesHistory, setUserMessagesHistory] = useState<Message[]>([]);
@@ -36,23 +39,35 @@ const Conversation = ({ selectedAlgorithm, data }: ConversationProps): JSX.Eleme
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     setCurrentMessage(event.target.value);
   }
+  
+  const { data: session }: any = useSession();
 
-  function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (currentMessage !== '') {
-      setUserMessages([...userMessages, { text: currentMessage, role: 'sender' , room: 1}]);
       // Switch statement to select appropriate response
-      let response = '';
-      // switch (selectedAlgorithm) {
-      //   case 'algorithm1':
-      //     alert('Response from kmp');
-      //     break;
-      //   case 'algorithm2':
-      //     alert('Response from bm');
-      //     break;
-      //   default:
-      //     alert('haha ga mencet lu');
-      // }
+
+      setUserMessages([...userMessages, {
+        sender: session?.user._id,
+        room: room,
+        role: "sender",
+        text: currentMessage,
+      }]);
+      try {
+        const apiRes = await axios.post("/api/chat/message", {
+          sender: session?.user._id,
+          room: room,
+          role: "sender",
+          text: currentMessage,
+        });
+        if (apiRes?.data?.success) {
+        }
+      } catch (error: unknown) {
+        if (error instanceof AxiosError) {
+          const errorMsg = error.response?.data?.error;
+          toast.error(errorMsg);
+        }
+      }
     }
     setCurrentMessage('');
     sendMessage();
@@ -69,11 +84,13 @@ const Conversation = ({ selectedAlgorithm, data }: ConversationProps): JSX.Eleme
         "/api/data/qna"
       );
       if (apiRes?.data?.success) {
-        setBotMessages([...botMessages, { text: apiRes.data.messages[0].answer, role: 'receiver' , room: 1}]);
+        setBotMessages([...botMessages, { sender:apiRes.data.messages[0].sender , text: apiRes.data.messages[0].answer, role: 'receiver' , room: 1}]);
       }
-    } catch (error) {
-      console.error(error);
-      alert('An error occurred while sending the message.');
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        const errorMsg = error.response?.data?.error;
+        toast.error(errorMsg);
+      }
     }
   };
 
