@@ -46,7 +46,6 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
     event.preventDefault();
     if (currentMessage !== '') {
       // Switch statement to select appropriate response
-
       setUserMessages([...userMessages, {
         sender: session?.user._id,
         room: room,

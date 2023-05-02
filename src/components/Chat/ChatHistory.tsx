@@ -34,14 +34,6 @@ interface Chat {
 
     const [room, setRoom] = useState(1);
 
-    // ini buat room
-    // useEffect(() => {
-    //   setRoom((prevRoom) => ({
-    //     ...prevRoom,
-    //     room: 1,
-    //   }));
-    // }, []);
-
     useEffect(() => {
       const fetchData = async () => {
         try {
