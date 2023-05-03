@@ -60,7 +60,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } else if (req.method === "GET") {
     try {
         const string = req.query.string; // ini pertanyaan dari pengguna
+        console.log("tes");
         console.log(string);
+        console.log("tes2");
 
         const qnas = await QnA.find(); // ini data yang didapet dari database ada di bawah contohnya
         // console.log(qnas);
@@ -103,8 +105,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         */
         
         const q = string as string;
-        console.log(getOutput(q, qnas, 'kmp'));
         const ret = getOutput(q, qnas, 'kmp');
+        console.log(ret);
         
 
 
@@ -140,41 +142,50 @@ interface QAObject {
 
 // FUNGSI SEARCH DATABASE
 function searchDatabase(query: string, data: QAObject[], algo: string): QAObject {
-  let result: QAObject = { _id: "", question: "", answer: "", __v: 0 };
-  let maxScore: number = 90;
-  let bestMatch: QAObject | undefined, exactMatch: QAObject | undefined;
-  const q = query;
-  query = query.toLowerCase().replace(/\s+/g, "").replace(/[^\w\s]|_/g, '');
+    let result: QAObject = { _id: "", question: "", answer: "", __v: 0 };
+    let maxScore: number = 90;
+    let bestMatch: QAObject | undefined, exactMatch: QAObject | undefined;
+    const q = query;
+    query = query.toLowerCase().replace(/[^\w\s]|_/g, '');
+    console.log(query);
 
-  for (const obj of data) {
-    const question: string = obj.question.toLowerCase().replace(/\s+/g, "").replace(/[^\w\s]|_/g, '');
-    if (matchPattern(algo, question, query)) {
-      exactMatch = obj;
-      maxScore = 100;
-      break;
+    for (const obj of data) {
+        const question: string = obj.question.toLowerCase().replace(/[^\w\s]|_/g, '');
+        if (matchPattern(algo, question, query)) {
+            exactMatch = obj;
+            maxScore = 100;
+            break;
+        }
+
+        const score: number = similarityPercentage(query, question);
+        // console.log(question);
+        // console.log(score);
+        if (score >= maxScore) {
+            maxScore = score;
+            bestMatch = obj;
+        }
     }
 
-    const score: number = similarityPercentage(query, obj.question);
-    if (score >= maxScore) {
-      maxScore = score;
-      bestMatch = obj;
+    if (exactMatch) {
+        result = exactMatch;
+    } else if (bestMatch) {
+        result = bestMatch;
+    } else {
+        const sortedResults: QAObject[] = data.sort((a: QAObject, b: QAObject) => similarityPercentage(query, b.question) - similarityPercentage(query, a.question));
+        const top3: QAObject[] = sortedResults.slice(0, 3);
+        result.question = q;
+        result.answer = `Pertanyaan tidak ditemukan. Mungkin maksud anda: ${top3.map(obj => `\n${obj.question}`).join('')}`;
     }
-  }
 
-  if (exactMatch) {
-    result = exactMatch;
-  } else if (bestMatch) {
-    result = bestMatch;
-  } else {
-    const sortedResults: QAObject[] = data.sort((a: QAObject, b: QAObject) => similarityPercentage(query, b.question) - similarityPercentage(query, a.question));
-    const top3: QAObject[] = sortedResults.slice(0, 3);
-    result.question = q;
-    result.answer = `Pertanyaan tidak ditemukan. Mungkin maksud anda: ${top3.map(obj => `\n${obj.question}`).join('')}`;
-  }
-
-  return result;
+    return result;
 }
 
+// FUNGSI TAMBAH PERTANYAAN
+// async function addData(q: string, a: string): void {
+//     const newQnA: QAObject = { _id: "", question: q, answer: a, __v: 0 };
+//     const result = await QnA.insertOne(newQnA);
+//     console.log(result);
+// }
 
 
 
@@ -427,6 +438,7 @@ function getOutput(input: string, data: QAObject[], algo: string): QAObject {
   const matchHapus = regHapus.exec(input);
 
   let result: QAObject = { _id: "", question: "", answer: "", __v: 0 };
+  console.log(input);
 
   if (matchTanggal) {
       result.question = input;
