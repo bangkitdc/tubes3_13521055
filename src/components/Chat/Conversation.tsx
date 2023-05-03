@@ -7,6 +7,9 @@ import { useSession } from 'next-auth/react';
 import { Message } from '@/types';
 import Image from 'next/image';
 import Send from "@/../public/icons/send.svg";
+import QuestionMark from "@/../public/icons/question_mark.svg";
+import Code from "@/../public/icons/code.svg";
+import Warning from "@/../public/icons/warning_amber.svg";
 
 interface ConversationProps {
   selectedAlgorithm: string;
@@ -190,7 +193,7 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
           userMessagesHistory.length == 0 &&
           botMessagesHistory.length == 0 && (
             <div className="container h-screen items-center flex flex-col gap-12 justify-center">
-              <div className="text-stone-50 text-center text-6xl">
+              <div className="text-stone-50 text-center text-5xl">
                 <Typewriter
                   onInit={handleInit}
                   options={{
@@ -201,35 +204,101 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
                   }}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-8 px-12">
-                <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
-                  <div className="p-6 text-sm text-stone-50 text-center">
-                    <p>
-                      <b>Question Prompts :</b>
+              <div className="grid grid-cols-3 gap-4 w-full px-32">
+                <div className="flex flex-col">
+                  <div className="flex flex-col justify-center items-center h-full">
+                    <Image src={QuestionMark} height={24} alt={""} />
+                    <p className="text-lg text-stone-50 text-center pt-1">
+                      Examples
                     </p>
-                    <p>{'"Apa ibukota Indonesia?"'}</p>
+                  </div>
+                  <div className="grid grid-rows-3 gap-4 mt-4">
+                    <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
+                      <div className="p-4 text-sm text-stone-50 text-center">
+                        <p>
+                          <b>Question Prompts :</b>
+                        </p>
+                        <p>{'"Apa ibukota Indonesia?"'}</p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
+                      <div className="p-4 text-sm text-stone-50 text-center">
+                        <p>
+                          <b>Simple Math Prompts :</b>
+                        </p>
+                        <p>{'"10 * 5 + 6 / 2"'}</p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
+                      <div className="p-4 text-sm text-stone-50 text-center">
+                        <p>
+                          <b>Date Prompts :</b>
+                        </p>
+                        <p>{'"Hari apa 17/08/1945"'}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
-                  <div className="p-6 text-sm text-stone-50 text-center">
-                    <p>
-                      <b>Simple Math Prompts :</b>
+                <div className="flex flex-col">
+                  <div className="flex flex-col justify-center items-center h-full">
+                    <Image src={Code} height={24} alt={""} />
+                    <p className="text-lg text-stone-50 text-center pt-1">
+                      Algorithms
                     </p>
-                    <p>
-                      {'"10 * 5 + 6 / 2"'}
-                    </p>
+                  </div>
+                  <div className="grid grid-rows-6 gap-4 mt-4">
+                    <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800 row-span-2">
+                      <div className="p-4 text-sm text-stone-50 text-center">
+                        <p>
+                          <b>Knuth-Morris-Pratt (KMP)</b>
+                        </p>
+                        <p>{"Teknik prefix function"}</p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800 row-span-3">
+                      <div className="p-4 text-sm text-stone-50 text-center">
+                        <p>
+                          <b>Boyer-Moore (BM)</b>
+                        </p>
+                        <p>
+                          {
+                            "Teknik heuristik sehingga tidak membandingkan karakter yang sudah ditelusuri"
+                          }
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
-                  <div className="p-6 text-sm text-stone-50 text-center">
-                    <p>
-                      <b>Date Prompts :</b>
+                <div className="flex flex-col">
+                  <div className="flex flex-col justify-center items-center h-full">
+                    <Image src={Warning} height={24} alt={""} />
+                    <p className="text-lg text-stone-50 text-center pt-1">
+                      Limitations
                     </p>
-                    <p>
-                      {'"Hari apa 17/08/1945"'}
-                    </p>
+                  </div>
+                  <div className="grid grid-rows-3 gap-4 mt-4">
+                    <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
+                      <div className="p-4 text-sm text-stone-50 text-center">
+                        <p>{"Mungkin memberikan informasi yang salah"}</p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
+                      <div className="p-4 text-sm text-stone-50 text-center">
+                        <p>{"Pertanyaan harus eksak, kemiripan minimal 90%"}</p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
+                      <div className="p-4 text-sm text-stone-50 text-center">
+                        <p>{"Data set terbatas dan tidak general"}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
