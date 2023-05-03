@@ -59,63 +59,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
   } else if (req.method === "GET") {
     try {
-        const string = req.query.string; // ini pertanyaan dari pengguna
-        console.log("tes");
-        console.log(string);
-        console.log("tes2");
+        const string : string = req.query.string as string; // question from user
+        const algo : string = req.query.algo as string;
 
-        const qnas = await QnA.find(); // ini data yang didapet dari database ada di bawah contohnya
-        // console.log(qnas);
-
-        /*
-          {
-            "success": true,
-            "messages": [
-                {
-                    "_id": "644ea2d391a4f18cd687d143",
-                    "question": "Hello",
-                    "answer": "Hello, how can I help you today?",
-                    "__v": 0
-                },
-                {
-                    "_id": "644ea37c91a4f18cd687d148",
-                    "question": "Who are you?",
-                    "answer": "I am boleeehhh, an AI model chatbot that can assist you in generating human-like responses to their question and provide information.",
-                    "__v": 0
-                }
-            ]
-        }
-
-        qnas kayak gini ngaksesnya brarti qnas.messages (ini return array of object)
-        */
-
-        // ALGORITMA DISINI NANTI RETURN YANG DI BAWAH DIGANTI YA
-        // misal res = hasilnya nah tapi kalo bisa si messagesnya yg di return
-        // kek messages[0] gitu
-        // tapi kalo misal mau banyak kek yang milih terdekat juga gapapa
-        // bikin aja yang penting returnya object
-        // contoh
-        /*
-        res = {
-          string="ITB adalah ...."; itu qnas yang dibawah diganti
-        }
-
-        sama coba cari cara biar dia bisa newline gitu gatau kalo string naro "\n" bisa apa gak
-
-        */
+        const qnas = await QnA.find(); // data from database
         
-        const q = string as string;
-        const ret = getOutput(q, qnas, 'kmp');
-        console.log(ret);
-        
-
+        const ret = getOutput(string, qnas, algo);
 
         return res.status(200).json({
             success: true,
-            ret // ini diganti ya
+            ret
         });
-
-        // nah tapi ini belom bisa dipake di main nya kalo mau console.log aja tapi return nya tetep qnas (biar gaerror)
     } catch (error) {
         if (error instanceof mongoose.Error.ValidationError) {
           for (let field in error.errors) {

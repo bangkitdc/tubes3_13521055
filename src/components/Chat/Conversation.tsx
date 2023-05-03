@@ -4,14 +4,7 @@ import axios, { AxiosError } from 'axios';
 import Messages from './Messages';
 import { toast } from 'react-toastify';
 import { useSession } from 'next-auth/react';
-import Message from '@/models/message';
-
-interface Message {
-  sender: string;
-  text: string;
-  role: string;
-  room: number;
-}
+import { Message } from '@/types';
 
 interface ConversationProps {
   selectedAlgorithm: string;
@@ -20,9 +13,6 @@ interface ConversationProps {
 }
 
 const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX.Element => {
-  
-  const router = useRouter();
-
   const [userMessagesHistory, setUserMessagesHistory] = useState<Message[]>([]);
   const [botMessagesHistory, setBotMessagesHistory] = useState<Message[]>([]);
   const [userMessages, setUserMessages] = useState<Message[]>([]);
@@ -48,12 +38,12 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
 
   useEffect(() => {
     setTimeout(() => {
-      const botMessagesElement = botMessagesRef2.current;
+      const botMessagesElement = botMessagesRef.current;
       if (botMessagesElement) {
         botMessagesElement.scrollIntoView({ behavior: "smooth" });
       }
     }, 1000);
-  }, []);
+  }, [room]);
 
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -87,15 +77,20 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
 
   const sendMessage = async () => {
     try {
-      const apiRes = await axios.get(
-        `/api/data/qna?string=${currentMessage}`
+      const qs = require("qs");
+      const algoString = selectedAlgorithm === "algorithm1" ? "kmp" : "bm";
+      const encodedMessage = qs.stringify(
+        { string: currentMessage, algo: algoString },
+        { encode: true, arrayFormat: "repeat" }
       );
+      const apiRes = await axios.get(`/api/data/qna?${encodedMessage}`);
+
       if (apiRes?.data?.success) {
         const dataPost: Message = {
           sender: session?.user._id,
           room: room,
           role: "receiver",
-          text: apiRes.data.messages[0].answer,
+          text: apiRes.data.ret.answer,
         };
         setBotMessages([...botMessages, dataPost]);
         
@@ -126,15 +121,12 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
     });
     setUserMessagesHistory(userMsg);
     setBotMessagesHistory(botMsg);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setUserMessages([]);
+    setBotMessages([]);
   }, [data]);
 
   useEffect(() => {
-    const userMessagesElement = userMessagesRef.current;
     const botMessagesElement = botMessagesRef.current;
-    if (userMessagesElement) {
-      userMessagesElement.scrollIntoView({ behavior: "smooth" });
-    }
     if (botMessagesElement) {
       botMessagesElement.scrollIntoView({ behavior: "smooth" });
     }
