@@ -18,4 +18,5 @@ export interface Message {
     text: string;
     role: string;
     room: number;
+    sender: string;
 }
