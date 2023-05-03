@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/router';
+import Typewriter, { TypewriterClass } from 'typewriter-effect';
 import axios, { AxiosError } from 'axios';
 import Messages from './Messages';
 import { toast } from 'react-toastify';
 import { useSession } from 'next-auth/react';
 import { Message } from '@/types';
+import Image from 'next/image';
+import Send from "@/../public/icons/send.svg";
 
 interface ConversationProps {
   selectedAlgorithm: string;
@@ -161,12 +163,78 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
     setReadyToEnter(true);
   };
 
+  const handleInit = (typewriter: TypewriterClass) => {
+    typewriter
+      .pauseFor(500)
+      .typeString("Hello World!")
+      .pauseFor(2000)
+      .deleteChars(6)
+      .pauseFor(500)
+      .typeString("All :)")
+      .pauseFor(2000)
+      .deleteAll()
+      .pauseFor(1000)
+      .typeString("Ask something . . .")
+      .pauseFor(5000)
+      .start();
+  };
+
   return (
     <div className="conversation flex flex-col gap-2 py-5 h-screen">
       <div
         className="messages flex-grow-1 flex flex-col pl-5 px-1 row-span-9 overflow-y-scroll"
         ref={userMessagesRef}
       >
+        {userMessages.length == 0 &&
+          botMessages.length == 0 &&
+          userMessagesHistory.length == 0 &&
+          botMessagesHistory.length == 0 && (
+            <div className="container h-screen items-center flex flex-col gap-12 justify-center">
+              <div className="text-stone-50 text-center text-6xl">
+                <Typewriter
+                  onInit={handleInit}
+                  options={{
+                    autoStart: true,
+                    delay: 100,
+                    loop: true,
+                    cursor: "",
+                  }}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-8 px-12">
+                <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
+                  <div className="p-6 text-sm text-stone-50 text-center">
+                    <p>
+                      <b>Question Prompts :</b>
+                    </p>
+                    <p>{'"Apa ibukota Indonesia?"'}</p>
+                  </div>
+                </div>
+
+                <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
+                  <div className="p-6 text-sm text-stone-50 text-center">
+                    <p>
+                      <b>Simple Math Prompts :</b>
+                    </p>
+                    <p>
+                      {'"10 * 5 + 6 / 2"'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
+                  <div className="p-6 text-sm text-stone-50 text-center">
+                    <p>
+                      <b>Date Prompts :</b>
+                    </p>
+                    <p>
+                      {'"Hari apa 17/08/1945"'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         <Messages
           userMessages={userMessagesHistory}
           botMessages={botMessagesHistory}
@@ -194,15 +262,15 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
             value={currentMessage}
             onChange={handleInputChange}
             placeholder="Send a message."
-            className="flex-1 rounded-lg py-2.5 pb-[11px] px-4 text-sm font-medium dark:bg-gray-800 dark:border-gray-900 text-stone-50 focus:outline-none"
+            className="flex-1 rounded-lg py-2.5 pb-[11px] px-4 text-sm font-medium dark:bg-gray-800 dark:border-gray-900 text-stone-50 focus:outline-none drop-shadow-sm"
             ref={callbackRef}
             autoComplete="off"
           />
           <button
             type="submit"
-            className="ml-2 py-2.5 pb-[11px] px-4 dark:bg-gray-800 dark:border-gray-900 rounded-lg text-stone-50 font-medium hover:bg-gray-700"
+            className="ml-2 py-2.5 pb-[11px] px-2.5 dark:bg-gray-800 dark:border-gray-900 rounded-lg text-stone-50 font-medium hover:bg-gray-700 drop-shadow-sm"
           >
-            Send
+            <Image src={Send} height={20} alt={""} />
           </button>
         </form>
       </div>

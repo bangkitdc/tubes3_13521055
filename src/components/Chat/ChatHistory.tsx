@@ -2,22 +2,21 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import Conversation from './Conversation';
 import axios, { AxiosError } from 'axios';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { toast } from "react-toastify";
 import { Message } from '@/types';
-import { useRouter } from 'next/router';
+import Profile from "@/../public/icons/person.svg";
+import More from "@/../public/icons/more_vert.svg";
+import Add from "@/../public/icons/add.svg";
+import ChatBubble from "@/../public/icons/chat_bubble_outline.svg";
+import Logout from "@/../public/icons/logout.svg";
+import Image from 'next/image';
 
 interface Chat {
     label: string;
   }
   
   const ChatHistory: React.FC = () => {
-    const router = useRouter();
-
-    // useEffect(() => {
-    //   router.push(`/${room}`);
-    // }, [room]);
-
     const [chatData, setChatData] = useState<Chat[]>([]);
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('algorithm1');
     const [dataPost, setDataPost] = useState<Message[]>([]);
@@ -38,23 +37,6 @@ interface Chat {
         window.localStorage.setItem("room", room.toString());
       }
     }, [room]);
-
-    //  // klo pake ini dia ngebug garagara labelnya bisa ga unik jadi kek doble2 berkali2
-    // // const addChat = () => {
-    // //   setChatData([...chatData, { label: `Chat ${chatData.length + 1}` }]);
-    // // };
-
-    // // tapi kayanya kalo api ga pake ini deh (pakenya yg atas) tp sok maneh coba
-    // const addChat = () => {
-    //   let newLabel = `Chat ${chatData.length + 1}`;
-      
-    //   // Check if label already exists in chatData
-    //   while (chatData.some(chat => chat.label === newLabel)) {
-    //     newLabel = `Chat ${parseInt(newLabel.split(' ')[1]) + 1}`;
-    //   }
-    
-    //   setChatData([...chatData, { label: newLabel }]);
-    // };
 
     const convertToNumber = (label: string): number => {
       const chatNumber = label.split(' ')[1]; // split the string by space and get the second part
@@ -120,29 +102,52 @@ interface Chat {
       fetchData();
     }, [room, session?.user?._id]);
     
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    const handleSignOut = () => {
+      localStorage.removeItem("room");
+      signOut();
+    };
 
   return (
-    <div className='grid grid-cols-5 h-screen w-screen bg-gray-50 dark:bg-gray-900'>
-        <div className=" h-full w-full col-span-1 py-5 pl-5 pr-2 dark:bg-gray-800">
-          <div className="flex flex-col w-full h-full items-center">
+    <div className="grid grid-cols-5 h-screen w-screen bg-gray-50 dark:bg-gray-900">
+      <div className=" h-full w-full col-span-1 py-5 dark:bg-gray-800">
+        <div className="flex flex-col w-full h-full items-center">
+          <div className="pl-5 pr-2 inner-shadow">
             <div
-              className="chat-label py-3 mr-[20px] w-[208px] border-2 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-400 rounded-lg text-white font-bold mb-5 cursor-pointer flex justify-center"
-              onClick={() => setRoom(chatData.length + 1)}>
-              Add New Chat
+              className="items-center py-3 px-4 mr-[20px] w-[208px] border-2 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-600 rounded-lg text-white font-bold mb-5 cursor-pointer flex drop-shadow-sm"
+              onClick={() => setRoom(chatData.length + 1)}
+            >
+              <Image src={Add} height={14} alt={""} />
+              <p className="px-4">New Chat</p>
             </div>
-            <div className="max-h-96 w-full overflow-y-scroll">
-              {chatData.slice().reverse().map((chat) => (
-                <div
-                  className={`chat-label py-3 px-8 border-2 ${room == convertToNumber(chat.label) ? "dark:bg-gray-400" : "dark:bg-gray-800"} dark:border-gray-700 hover:bg-gray-400 rounded-lg text-white font-bold mb-3 w-full flex justify-center cursor-pointer`}
-                  key={chat.label}
-                  onClick={() => handleChatClick(chat.label)}
-                >
-                  <Link href="/">{chat.label}</Link>
-                </div>
-              ))}
+          </div>
+          <div className="pl-5 pr-2 w-full">
+            <div className="max-h-[26rem] w-full overflow-y-scroll">
+              {chatData
+                .slice()
+                .reverse()
+                .map((chat) => (
+                  <div
+                    className={`py-3 px-4 border-2 ${
+                      room == convertToNumber(chat.label)
+                        ? "dark:bg-gray-600"
+                        : "dark:bg-gray-800"
+                    } dark:border-gray-700 hover:bg-gray-600 rounded-lg text-white font-bold mb-3 w-full flex cursor-pointer drop-shadow-sm`}
+                    key={chat.label}
+                    onClick={() => handleChatClick(chat.label)}
+                  >
+                    <Image src={ChatBubble} height={18} alt={""} />
+                    <Link className="px-4" href="/">
+                      {chat.label}
+                    </Link>
+                  </div>
+                ))}
             </div>
-            <div className="mt-auto mr-[20px] w-[208px]">
-              <ul className="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-800 dark:text-white">
+          </div>
+          <div className="mt-auto border-t-2 w-full border-gray-900 z-2">
+            <div className="pt-[22px] w-full drop-shadow-sm pl-5 pr-7">
+              <ul className="items-center px-2 w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-800 dark:text-white">
                 <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-800">
                   <div className="flex items-center pl-3">
                     <input
@@ -152,7 +157,7 @@ interface Chat {
                       value="algorithm1"
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 cursor-pointer"
                       onChange={handleAlgorithmChange}
-                      checked={selectedAlgorithm === 'algorithm1'}
+                      checked={selectedAlgorithm === "algorithm1"}
                     />
                     <label className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
                       KMP
@@ -160,7 +165,7 @@ interface Chat {
                   </div>
                 </li>
                 <li className="w-full dark:border-gray-600">
-                  <div className="flex items-center pl-3">
+                  <div className="flex items-center px-5">
                     <input
                       type="radio"
                       id="algorithm2"
@@ -168,7 +173,7 @@ interface Chat {
                       value="algorithm2"
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 cursor-pointer"
                       onChange={handleAlgorithmChange}
-                      checked={selectedAlgorithm === 'algorithm2'}
+                      checked={selectedAlgorithm === "algorithm2"}
                     />
                     <label className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
                       BM{" "}
@@ -177,16 +182,42 @@ interface Chat {
                 </li>
               </ul>
             </div>
-            <div className='mr-[20px] w-[208px]'>
-
+            <div className="w-full pt-2 relative drop-shadow-sm pl-5 pr-7">
+              {isDropdownOpen && (
+                <div className="absolute bottom-[52px] z-30 drop-shadow-lg rounded-lg w-[208px] bg-gray-900">
+                  <div className="py-2">
+                    <button
+                      className="cursor-pointer flex w-full px-4 py-1 text-sm hover:bg-gray-600 text-gray-200"
+                      onClick={handleSignOut}
+                    >
+                      <Image src={Logout} height={24} alt={""} />
+                      <p className="px-4">Log out</p>
+                    </button>
+                  </div>
+                </div>
+              )}
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="px-4 h-11 items-center w-full text-stone-50 text-sm bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-800"
+              >
+                <Image src={Profile} height={24} alt={""} />
+                <p className="px-4 text-stone-50 w-full text-left">
+                  {session?.user?.name}
+                </p>
+                <Image src={More} height={24} alt={""} />
+              </button>
             </div>
           </div>
         </div>
+      </div>
       <div className="col-span-4">
-        <Conversation selectedAlgorithm={selectedAlgorithm} data={dataPost} room={room}/>
+        <Conversation
+          selectedAlgorithm={selectedAlgorithm}
+          data={dataPost}
+          room={room}
+        />
       </div>
     </div>
-    
   );
 };
 
