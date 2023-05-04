@@ -10,7 +10,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (!req.body) {
       return res.status(400).json({ error: "Data is missing" });
     }
-    const { question, answer } = req.body;
+    const regTambah = /^(tambahkan pertanyaan|tambah pertanyaan|tambahkan|tambah)\s(.+?)\s(dengan jawaban|jawaban|jawab)\s(.+)$/;
+    const regHapus = /^(hapus pertanyaan|hapus) (.+)$/i;
+    
+    let { question, answer } = req.body;
+    const execDel = regHapus.exec(question);
+    const execAdd = regTambah.exec(question);
+    if (execAdd) {
+        question = execAdd[2];
+        answer = execAdd[4];
+    }
+    if (execDel) {
+        question = execDel[2];
+    }
 
     const messageExists = await QnA.findOne({ question });
 
@@ -433,7 +445,7 @@ function getOutput(input: string, data: QAObject[], algo: string): [string, QAOb
     const regTanggal = /\b\d{1,2}[\/\-\ ]\d{1,2}[\/\-\ ]\d{2}(?:\d{2})?\b/;
     const matchTanggal = input.match(regTanggal);
     const regCekMat = /\d+\s*[\+\-\*\/\^\(\)]\s*\d+/;
-    const regMat = /^(\d+|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+|\([^\(\)]*\)))*$/;
+    const regMat = /^\s*(\d+|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+|\([^\(\)]*\)))*\s*$/;
     const regTambah = /^(tambahkan pertanyaan|tambah pertanyaan|tambahkan|tambah)\s(.+?)\s(dengan jawaban|jawaban|jawab)\s(.+)$/;
     const matchTambah = regTambah.exec(input);
     const regHapus = /^(hapus pertanyaan|hapus) (.+)$/i;
@@ -469,7 +481,7 @@ function getOutput(input: string, data: QAObject[], algo: string): [string, QAOb
         const que = checkExist(qAdd, data, algo);
         if (que) {
             method = "update";
-            result.answer = "Pertanyaan \"" + que + "\" sudah ada! jawaban diupdate ke " + aAdd;
+            result.answer = "Pertanyaan \"" + que + "\" sudah ada! jawaban diupdate ke \"" + aAdd + "\"";
         } else {
             method = "add";
             result.answer = "Pertanyaan \"" + qAdd + "\" telah ditambahkan!";
