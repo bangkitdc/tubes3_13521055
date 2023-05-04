@@ -12,13 +12,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
     const { question, answer } = req.body;
 
-    const messageExists = await QnA.findOne({ question });
-
     if (question.length < 1) {
     return res
         .status(409)
         .json({ error: "Question should be at least 1 characters long" });
     }
+
+    const messageExists = await QnA.findOne({ question });
     try {
         if (messageExists) {
             messageExists.answer = answer;
@@ -71,6 +71,50 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // delete
         // add
         // update
+        
+        if (method === "add" || method === "update") {
+            const regTambah = /^(tambahkan pertanyaan|tambah pertanyaan|tambahkan|tambah)\s(.+?)\s(dengan jawaban|jawaban|jawab)\s(.+)$/;
+            let question = ret.question;
+            let answer = ret.answer;
+            const exec = regTambah.exec(question);
+            if (exec) {
+                question = exec[2];
+                answer = exec[4];
+            }
+
+            if (question.length < 1) {
+                return res
+                    .status(409)
+                    .json({ error: "Question should be at least 1 characters long" });
+            }
+
+            const messageExists = await QnA.findOne({ question });
+
+            if (messageExists) { // if exist, update instead
+                messageExists.answer = answer;
+                await messageExists.save();
+            } else {
+                await QnA.create({
+                    question,
+                    answer
+                });
+            }
+        } else if (method === "delete") {
+            const regHapus = /^(hapus pertanyaan|hapus) (.+)$/i;
+            
+            let question = ret.question;
+            const execDel = regHapus.exec(question);
+            
+            if (execDel) {
+                question = execDel[2];
+            }
+
+            const messageExists = await QnA.findOne({ question: question });
+
+            if (messageExists) { // if exist, delete
+                await messageExists.deleteOne();
+            }
+        }
 
         return res.status(200).json({
             success: true,
@@ -132,7 +176,7 @@ function searchDatabase(query: string, data: QAObject[], algo: string): QAObject
         const sortedResults: QAObject[] = data.sort((a: QAObject, b: QAObject) => similarityPercentage(query, b.question) - similarityPercentage(query, a.question));
         const top3: QAObject[] = sortedResults.slice(0, 3);
         result.question = q;
-        result.answer = `Pertanyaan tidak ditemukan. Mungkin maksud anda: ${top3.map(obj => `\n${obj.question}`).join('')}`;
+        result.answer = `Pertanyaan tidak ditemukan. Mungkin maksud anda: ${top3.map((obj, i) => `\n${i + 1}. ${obj.question}`).join('')}`;
     }
 
     return result;

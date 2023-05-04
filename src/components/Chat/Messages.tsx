@@ -25,7 +25,7 @@ const Messages: React.FC<Props> = ({
     if (i <= lastDisplayedUserMessageIndex && i < userMessages.length) {
       renderedMessages.push(
         <div key={`user-${i}`} className="message-user right p-4 drop-shadow-md">
-          <div className="bg-sky-800 text-stone-50 rounded-lg p-2 whitespace-pre-line">
+          <div className="bg-sky-800 text-stone-50 rounded-lg p-2 whitespace-pre-line max-w-2xl">
               {userMessages[i].text}
           </div>
         </div>
@@ -44,7 +44,7 @@ const Messages: React.FC<Props> = ({
 
       renderedMessages.push(
         <div key={`bot-${i}`} className="message-bot left p-4 drop-shadow-md">
-          <div className="bg-sky-700 text-stone-50 rounded-lg p-2 whitespace-pre-line">
+          <div className="bg-sky-700 text-stone-50 rounded-lg p-2 whitespace-pre-line max-w-2xl">
             {history && 
               botMessages[i].text
             }

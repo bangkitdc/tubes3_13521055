@@ -15,9 +15,11 @@ interface ConversationProps {
   selectedAlgorithm: string;
   data: Message[];
   room: number;
+  maxRoom: number;
+  onChangeRoom: () => void;
 }
 
-const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX.Element => {
+const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: ConversationProps): JSX.Element => {
   const [userMessagesHistory, setUserMessagesHistory] = useState<Message[]>([]);
   const [botMessagesHistory, setBotMessagesHistory] = useState<Message[]>([]);
   const [userMessages, setUserMessages] = useState<Message[]>([]);
@@ -55,10 +57,14 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
 
     if (currentMessage !== '' && readyToEnter) {
       setReadyToEnter(false);
+      
+      if (room == 0) {
+        onChangeRoom();
+      }
 
       const dataPost: Message = {
         sender: session?.user._id,
-        room: room,
+        room: room == 0 ? maxRoom + 1 : room,
         role: "sender",
         text: currentMessage,
       };
@@ -91,9 +97,12 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
       const apiRes = await axios.get(`/api/data/qna?${encodedMessage}`);
 
       if (apiRes?.data?.success) {
+        if (room == 0) {
+          onChangeRoom();
+        }
         const dataPost: Message = {
           sender: session?.user._id,
-          room: room,
+          room: room == 0 ? maxRoom + 1 : room,
           role: "receiver",
           text: apiRes.data.ret.answer,
         };
@@ -213,32 +222,43 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
                     </p>
                   </div>
                   <div className="grid grid-rows-3 gap-4 mt-4">
-                    <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
+                    <button
+                      className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800 hover:bg-gray-600 cursor-pointer"
+                      onClick={() =>
+                        setCurrentMessage("Apa ibukota Indonesia?")
+                      }
+                    >
                       <div className="p-4 text-sm text-stone-50 text-center">
                         <p>
                           <b>Question Prompts :</b>
                         </p>
                         <p>{'"Apa ibukota Indonesia?"'}</p>
                       </div>
-                    </div>
+                    </button>
 
-                    <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
+                    <button
+                      className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800 hover:bg-gray-600 cursor-pointer"
+                      onClick={() => setCurrentMessage("(2 ^ 6) / 2 + 16 * 2")}
+                    >
                       <div className="p-4 text-sm text-stone-50 text-center">
                         <p>
                           <b>Simple Math Prompts :</b>
                         </p>
-                        <p>{'"10 * 5 + 6 / 2"'}</p>
+                        <p>{'"(2 ^ 6) / 2 + 16 * 2"'}</p>
                       </div>
-                    </div>
+                    </button>
 
-                    <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
+                    <button
+                      className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800 hover:bg-gray-600 cursor-pointer"
+                      onClick={() => setCurrentMessage("Hari apa 17/08/1945?")}
+                    >
                       <div className="p-4 text-sm text-stone-50 text-center">
                         <p>
                           <b>Date Prompts :</b>
                         </p>
-                        <p>{'"Hari apa 17/08/1945"'}</p>
+                        <p>{'"Hari apa 17/08/1945?"'}</p>
                       </div>
-                    </div>
+                    </button>
                   </div>
                 </div>
 
@@ -249,24 +269,28 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
                       Algorithms
                     </p>
                   </div>
-                  <div className="grid grid-rows-6 gap-4 mt-4">
+                  <div className="grid grid-rows-2 gap-4 mt-4 pb-2">
                     <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800 row-span-2">
                       <div className="p-4 text-sm text-stone-50 text-center">
                         <p>
                           <b>Knuth-Morris-Pratt (KMP)</b>
                         </p>
-                        <p>{"Teknik prefix function"}</p>
+                        <p>
+                          {
+                            "Teknik pencocokan string matching dengan prefix function"
+                          }
+                        </p>
                       </div>
                     </div>
 
-                    <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800 row-span-3">
+                    <div className="rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 bg-gray-800">
                       <div className="p-4 text-sm text-stone-50 text-center">
                         <p>
                           <b>Boyer-Moore (BM)</b>
                         </p>
                         <p>
                           {
-                            "Teknik heuristik sehingga tidak membandingkan karakter yang sudah ditelusuri"
+                            "Teknik pencocokan string dengan heuristik (tanpa memeriksa ulang)"
                           }
                         </p>
                       </div>
@@ -339,7 +363,12 @@ const Conversation = ({ selectedAlgorithm, data, room }: ConversationProps): JSX
             type="submit"
             className="ml-2 py-2.5 pb-[11px] px-2.5 dark:bg-gray-800 dark:border-gray-900 rounded-lg text-stone-50 font-medium hover:bg-gray-700 drop-shadow-sm"
           >
-            <Image src={Send} height={20} alt={""} />
+            <Image
+              className="rotate-[-45deg]"
+              src={Send}
+              height={20}
+              alt={""}
+            />
           </button>
         </form>
       </div>
