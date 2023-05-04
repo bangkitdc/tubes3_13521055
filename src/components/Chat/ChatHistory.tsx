@@ -20,7 +20,7 @@ interface Chat {
     const [chatData, setChatData] = useState<Chat[]>([]);
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('algorithm1');
     const [dataPost, setDataPost] = useState<Message[]>([]);
-    const [allRooms, setAllRoom] = useState<number[]>();
+    const [allRooms, setAllRoom] = useState<number[]>([]);
     const [data, setData] = useState<Message[]>([]);
     const { data: session }: any = useSession();
 
@@ -107,6 +107,10 @@ interface Chat {
     const handleSignOut = () => {
       localStorage.removeItem("room");
       signOut();
+    };
+
+    const handleChangeRoom = () => {
+      setRoom(Math.max(...allRooms) + 1);
     };
 
   return (
@@ -215,6 +219,8 @@ interface Chat {
           selectedAlgorithm={selectedAlgorithm}
           data={dataPost}
           room={room}
+          maxRoom={Math.max(...allRooms)}
+          onChangeRoom={handleChangeRoom}
         />
       </div>
     </div>
