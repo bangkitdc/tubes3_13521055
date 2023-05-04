@@ -20,24 +20,9 @@ interface Chat {
   const ChatHistory: React.FC = () => {
     const [chatData, setChatData] = useState<Chat[]>([]);
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('algorithm1');
-    const [dataPost, setDataPost] = useState<Message[]>([]);
     const [allRooms, setAllRoom] = useState<number[]>([]);
     const [data, setData] = useState<Message[]>([]);
     const { data: session }: any = useSession();
-
-    const [room, setRoom] = useState(() => {
-      if (typeof window !== "undefined") {
-        const storedRoom = window.localStorage.getItem("room");
-        return storedRoom !== null ? parseInt(storedRoom) : 0;
-      }
-      return 0;
-    });
-
-    useEffect(() => {
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("room", room.toString());
-      }
-    }, [room]);
 
     const convertToNumber = (label: string): number => {
       const chatNumber = label.split(' ')[1]; // split the string by space and get the second part
@@ -81,38 +66,43 @@ interface Chat {
       };
       fetchData();
     }, [session?.user?._id, data]);
-
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const senderId: string = session?.user?._id;
-          const apiEndpoint = `/api/chat/message?senderId=${senderId}&roomNumber=${room}`;
-          const apiRes = await axios.get(apiEndpoint);
-
-          const data = apiRes.data.messages;
-          
-          setDataPost(data);
-        } catch (error: unknown) {
-          if (error instanceof AxiosError) {
-            const errorMsg = error.response?.data?.error;
-            toast.error(errorMsg);
-          }
-        }
-      };
-      fetchData();
-    }, [room, session?.user?._id]);
     
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const handleSignOut = () => {
       localStorage.removeItem("room");
-      signOut();
+      signOut({ callbackUrl: '/login' });
     };
 
+    const [flag, setFlag] = useState(false);
+
     const handleChangeRoom = () => {
-      localStorage.removeItem("room");
-      setRoom(Math.max(...allRooms) + 1);
+      setFlag(true);
     };
+
+    const [room, setRoom] = useState(() => {
+      if (typeof window !== "undefined") {
+        const storedRoom = window.localStorage.getItem("room");
+        if (storedRoom !== null) {
+          return parseInt(storedRoom);
+        }
+      }
+      return 0;
+    });
+
+    // useEffect(() => {
+    //   if (allRooms.length === 0) {
+    //     setRoom(0);
+    //   } else {
+    //     setRoom(Math.max(...allRooms) + 1);
+    //   }
+    // }, [allRooms]);
+
+    useEffect(() => {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("room", room.toString());
+      }
+    }, [room]);
 
     const handleDeleteRoom = async () => {
       try {
@@ -122,11 +112,12 @@ interface Chat {
 
         if (apiRes?.data?.success) {
           localStorage.removeItem("room");
-          setRoom(0);
 
           setTimeout(() => {
-            setRoom(chatData.length);
-          }, 1000);
+            setRoom(Math.max(...allRooms));
+          }, 100);
+
+          setRoom(0);
         }
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -136,6 +127,13 @@ interface Chat {
       }
     };
 
+    useEffect(() => {
+      if (allRooms.length > 0) {
+        setRoom(Math.max(...allRooms) + 1);
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [flag]);
+
   return (
     <div className="grid grid-cols-5 h-screen w-screen bg-gray-50 dark:bg-gray-900">
       <div className=" h-full w-full col-span-1 py-5 dark:bg-gray-800">
@@ -143,7 +141,9 @@ interface Chat {
           <div className="pl-5 pr-2 inner-shadow w-full">
             <div
               className="items-center py-3 px-4 mr-[20px] border-2 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-600 rounded-lg text-white font-bold mb-5 cursor-pointer flex drop-shadow-sm"
-              onClick={() => setRoom(chatData.length + 1)}
+              onClick={() => {
+                setRoom(Math.max(...allRooms) + 1);
+              }}
             >
               <Image src={Add} height={14} alt={""} />
               <p className="px-4">New Chat</p>
@@ -170,7 +170,8 @@ interface Chat {
                     </Link>
                     {room == convertToNumber(chat.label) && (
                       <button className="hover:bg-gray-700 rounded-2xl"
-                      onClick={handleDeleteRoom}>
+                      onClick={handleDeleteRoom}
+                      >
                         <Image src={Delete} height={28} alt={""} />
                       </button>
                     )}
@@ -246,7 +247,6 @@ interface Chat {
       <div className="col-span-4">
         <Conversation
           selectedAlgorithm={selectedAlgorithm}
-          data={dataPost}
           room={room}
           maxRoom={Math.max(...allRooms)}
           onChangeRoom={handleChangeRoom}

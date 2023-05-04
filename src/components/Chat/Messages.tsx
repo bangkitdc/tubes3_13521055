@@ -19,7 +19,7 @@ const Messages: React.FC<Props> = ({
   history,
   onMessageReady
 }) => {
-  const renderedMessages: JSX.Element[] = [];
+  let renderedMessages: JSX.Element[] = []; 
   
   for (let i = 0; i < userMessages.length || i < botMessages.length; i++) {
     if (i <= lastDisplayedUserMessageIndex && i < userMessages.length) {

@@ -13,13 +13,12 @@ import Warning from "@/../public/icons/warning_amber.svg";
 
 interface ConversationProps {
   selectedAlgorithm: string;
-  data: Message[];
   room: number;
   maxRoom: number;
   onChangeRoom: () => void;
 }
 
-const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: ConversationProps): JSX.Element => {
+const Conversation = ({ selectedAlgorithm, room, maxRoom, onChangeRoom }: ConversationProps): JSX.Element => {
   const [userMessagesHistory, setUserMessagesHistory] = useState<Message[]>([]);
   const [botMessagesHistory, setBotMessagesHistory] = useState<Message[]>([]);
   const [userMessages, setUserMessages] = useState<Message[]>([]);
@@ -36,12 +35,34 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
   const [lastDisplayedBotMessageIndex, setLastDisplayedBotMessageIndex] = useState<number>(-1);
 
   const [readyToEnter, setReadyToEnter] = useState(true);
+  const [data, setData] = useState<Message[]>([]);
+
+  const { data: session }: any = useSession();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const senderId: string = session?.user?._id;
+        const apiEndpoint = `/api/chat/message?senderId=${senderId}&roomNumber=${room}`;
+        const apiRes = await axios.get(apiEndpoint);
+
+        const data = apiRes.data.messages;
+
+        setData(data);
+      } catch (error: unknown) {
+        if (error instanceof AxiosError) {
+          const errorMsg = error.response?.data?.error;
+          toast.error(errorMsg);
+        }
+      }
+    };
+    fetchData();
+  }, [room, session?.user?._id]);
   
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     setCurrentMessage(event.target.value);
+    onChangeRoom();
   }
-  
-  const { data: session }: any = useSession();
 
   useEffect(() => {
     setTimeout(() => {
@@ -58,9 +79,9 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
     if (currentMessage !== '' && readyToEnter) {
       setReadyToEnter(false);
       
-      if (room == 0) {
-        onChangeRoom();
-      }
+      // if (room == 0) {
+      //   onChangeRoom();
+      // }
 
       const dataPost: Message = {
         sender: session?.user._id,
@@ -70,9 +91,11 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
       };
 
       setUserMessages([...userMessages, dataPost]);
+
       try {
         const apiRes = await axios.post("/api/chat/message", dataPost);
         if (apiRes?.data?.success) {
+
         }
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -97,9 +120,9 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
       const apiRes = await axios.get(`/api/data/qna?${encodedMessage}`);
 
       if (apiRes?.data?.success) {
-        if (room == 0) {
-          onChangeRoom();
-        }
+        // if (room == 0) {
+        //   onChangeRoom();
+        // }
         const dataPost: Message = {
           sender: session?.user._id,
           room: room == 0 ? maxRoom + 1 : room,
@@ -110,7 +133,7 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
         
         const apiPost = await axios.post("/api/chat/message", dataPost);
         if (apiPost?.data?.success) {
-          
+
         }
       }
 
@@ -122,24 +145,6 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
     }
   };
 
-  // ini misah dummy data ke user sm bot
-  useEffect(() => {
-    const userMsg: Message[] = [];
-    const botMsg: Message[] = [];
-    data.forEach((d) => {
-      if (d.role === "sender") {
-        userMsg.push(d);
-      } else {
-        botMsg.push(d);
-      }
-    });
-    setUserMessages([]);
-    setBotMessages([]);
-
-    setUserMessagesHistory(userMsg);
-    setBotMessagesHistory(botMsg); 
-  }, [data]);
-
   useEffect(() => {
     const botMessagesElement = botMessagesRef.current;
     if (botMessagesElement) {
@@ -149,15 +154,6 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
   }, [userMessages, botMessages, readyToEnter]);
 
   useEffect(() => {
-    if (userMessagesHistory.length > lastDisplayedUserMessageIndexHistory) {
-      setLastDisplayedUserMessageIndexHistory(userMessagesHistory.length);
-    }
-    if (botMessagesHistory.length > lastDisplayedBotMessageIndexHistory) {
-      setLastDisplayedBotMessageIndexHistory(botMessagesHistory.length);
-    }
-  }, [userMessagesHistory, botMessagesHistory, lastDisplayedUserMessageIndexHistory, lastDisplayedBotMessageIndexHistory]);
-
-  useEffect(() => {
     if (userMessages.length > lastDisplayedUserMessageIndex) {
       setLastDisplayedUserMessageIndex(userMessages.length);
     }
@@ -165,6 +161,15 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
       setLastDisplayedBotMessageIndex(botMessages.length);
     }
   }, [userMessages, botMessages, lastDisplayedUserMessageIndex, lastDisplayedBotMessageIndex]);
+
+  useEffect(() => {
+    if (userMessagesHistory.length > lastDisplayedUserMessageIndexHistory) {
+      setLastDisplayedUserMessageIndexHistory(userMessagesHistory.length);
+    }
+    if (botMessagesHistory.length > lastDisplayedBotMessageIndexHistory) {
+      setLastDisplayedBotMessageIndexHistory(botMessagesHistory.length);
+    }
+  }, [userMessagesHistory, botMessagesHistory, lastDisplayedUserMessageIndexHistory, lastDisplayedBotMessageIndexHistory]);
 
   const callbackRef = useCallback((inputElement: any) => {
     if (inputElement) {
@@ -191,6 +196,23 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
       .pauseFor(5000)
       .start();
   };
+
+  useEffect(() => {
+    const userMsg: Message[] = [];
+    const botMsg: Message[] = [];
+    data.forEach((d) => {
+      if (d.role === "sender") {
+        userMsg.push(d);
+      } else {
+        botMsg.push(d);
+      }
+    });
+    setUserMessagesHistory(userMsg);
+    setBotMessagesHistory(botMsg);
+
+    setUserMessages([]);
+    setBotMessages([]);
+  }, [data]);
 
   return (
     <div className="conversation flex flex-col gap-2 py-5 h-screen">
