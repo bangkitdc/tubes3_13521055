@@ -78,10 +78,6 @@ const Conversation = ({ selectedAlgorithm, room, maxRoom, onChangeRoom }: Conver
 
     if (currentMessage !== '' && readyToEnter) {
       setReadyToEnter(false);
-      
-      // if (room == 0) {
-      //   onChangeRoom();
-      // }
 
       const dataPost: Message = {
         sender: session?.user._id,
@@ -120,9 +116,6 @@ const Conversation = ({ selectedAlgorithm, room, maxRoom, onChangeRoom }: Conver
       const apiRes = await axios.get(`/api/data/qna?${encodedMessage}`);
 
       if (apiRes?.data?.success) {
-        // if (room == 0) {
-        //   onChangeRoom();
-        // }
         const dataPost: Message = {
           sender: session?.user._id,
           room: room == 0 ? maxRoom + 1 : room,

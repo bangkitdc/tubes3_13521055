@@ -90,14 +90,6 @@ interface Chat {
       return 0;
     });
 
-    // useEffect(() => {
-    //   if (allRooms.length === 0) {
-    //     setRoom(0);
-    //   } else {
-    //     setRoom(Math.max(...allRooms) + 1);
-    //   }
-    // }, [allRooms]);
-
     useEffect(() => {
       if (typeof window !== "undefined") {
         window.localStorage.setItem("room", room.toString());
