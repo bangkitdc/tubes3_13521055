@@ -120,10 +120,8 @@ interface Chat {
     };
 
     useEffect(() => {
-      if (allRooms.length > 0) {
-        setRoom(Math.max(...allRooms) + 1);
-      }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        setRoom(allRooms.length != 0 ? Math.max(...allRooms) + 1 : 0);
+          // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [flag]);
 
   return (
@@ -134,7 +132,7 @@ interface Chat {
             <div
               className="items-center py-3 px-4 mr-[20px] border-2 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-600 rounded-lg text-white font-bold mb-5 cursor-pointer flex drop-shadow-sm"
               onClick={() => {
-                setRoom(Math.max(...allRooms) + 1);
+                setRoom(allRooms.length != 0 ? Math.max(...allRooms) + 1 : 1);
               }}
             >
               <Image src={Add} height={14} alt={""} />

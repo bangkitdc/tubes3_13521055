@@ -79,12 +79,16 @@ const Conversation = ({ selectedAlgorithm, room, maxRoom, onChangeRoom }: Conver
     if (currentMessage !== '' && readyToEnter) {
       setReadyToEnter(false);
 
-      const dataPost: Message = {
+      let dataPost: Message = {
         sender: session?.user._id,
         room: room == 0 ? maxRoom + 1 : room,
         role: "sender",
         text: currentMessage,
       };
+
+      if (!isFinite(dataPost.room)) {
+        dataPost.room = 1;
+      }
 
       setUserMessages([...userMessages, dataPost]);
 
@@ -116,17 +120,19 @@ const Conversation = ({ selectedAlgorithm, room, maxRoom, onChangeRoom }: Conver
       const apiRes = await axios.get(`/api/data/qna?${encodedMessage}`);
 
       if (apiRes?.data?.success) {
-        const dataPost: Message = {
+        let dataPost: Message = {
           sender: session?.user._id,
           room: room == 0 ? maxRoom + 1 : room,
           role: "receiver",
           text: apiRes.data.ret.answer,
         };
+        if (!isFinite(dataPost.room)) {
+          dataPost.room = 1;
+        }
         setBotMessages([...botMessages, dataPost]);
         
         const apiPost = await axios.post("/api/chat/message", dataPost);
         if (apiPost?.data?.success) {
-
         }
       }
 
