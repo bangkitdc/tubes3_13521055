@@ -10,6 +10,7 @@ import More from "@/../public/icons/more_vert.svg";
 import Add from "@/../public/icons/add.svg";
 import ChatBubble from "@/../public/icons/chat_bubble_outline.svg";
 import Logout from "@/../public/icons/logout.svg";
+import Delete from "@/../public/icons/delete.svg";
 import Image from 'next/image';
 
 interface Chat {
@@ -81,7 +82,6 @@ interface Chat {
       fetchData();
     }, [session?.user?._id, data]);
 
-    //sori aing komen biar bisa jalan pake dummy dulu
     useEffect(() => {
       const fetchData = async () => {
         try {
@@ -90,7 +90,7 @@ interface Chat {
           const apiRes = await axios.get(apiEndpoint);
 
           const data = apiRes.data.messages;
-
+          
           setDataPost(data);
         } catch (error: unknown) {
           if (error instanceof AxiosError) {
@@ -110,7 +110,30 @@ interface Chat {
     };
 
     const handleChangeRoom = () => {
+      localStorage.removeItem("room");
       setRoom(Math.max(...allRooms) + 1);
+    };
+
+    const handleDeleteRoom = async () => {
+      try {
+        const senderId: string = session?.user?._id;
+        const apiEndpoint = `/api/chat/message?senderId=${senderId}&roomNumber=${room}`;
+        const apiRes = await axios.delete(apiEndpoint);
+
+        if (apiRes?.data?.success) {
+          localStorage.removeItem("room");
+          setRoom(0);
+
+          setTimeout(() => {
+            setRoom(chatData.length);
+          }, 1000);
+        }
+      } catch (error: unknown) {
+        if (error instanceof AxiosError) {
+          const errorMsg = error.response?.data?.error;
+          toast.error(errorMsg);
+        }
+      }
     };
 
   return (
@@ -142,9 +165,15 @@ interface Chat {
                     onClick={() => handleChatClick(chat.label)}
                   >
                     <Image src={ChatBubble} height={18} alt={""} />
-                    <Link className="px-4" href="/">
+                    <Link className="px-4 w-full" href="/">
                       {chat.label}
                     </Link>
+                    {room == convertToNumber(chat.label) && (
+                      <button className="hover:bg-gray-700 rounded-2xl"
+                      onClick={handleDeleteRoom}>
+                        <Image src={Delete} height={28} alt={""} />
+                      </button>
+                    )}
                   </div>
                 ))}
             </div>

@@ -68,11 +68,11 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
         role: "sender",
         text: currentMessage,
       };
+
       setUserMessages([...userMessages, dataPost]);
       try {
         const apiRes = await axios.post("/api/chat/message", dataPost);
         if (apiRes?.data?.success) {
-          
         }
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -110,7 +110,7 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
         
         const apiPost = await axios.post("/api/chat/message", dataPost);
         if (apiPost?.data?.success) {
-
+          
         }
       }
 
@@ -133,10 +133,11 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
         botMsg.push(d);
       }
     });
-    setUserMessagesHistory(userMsg);
-    setBotMessagesHistory(botMsg);
     setUserMessages([]);
     setBotMessages([]);
+
+    setUserMessagesHistory(userMsg);
+    setBotMessagesHistory(botMsg); 
   }, [data]);
 
   useEffect(() => {
@@ -197,7 +198,7 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
         className="messages flex-grow-1 flex flex-col pl-5 px-1 row-span-9 overflow-y-scroll"
         ref={userMessagesRef}
       >
-        {userMessages.length == 0 &&
+        { userMessages.length == 0 &&
           botMessages.length == 0 &&
           userMessagesHistory.length == 0 &&
           botMessagesHistory.length == 0 && (
@@ -361,12 +362,12 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
           />
           <button
             type="submit"
-            className="ml-2 py-2.5 pb-[11px] px-2.5 dark:bg-gray-800 dark:border-gray-900 rounded-lg text-stone-50 font-medium hover:bg-gray-700 drop-shadow-sm"
+            className="ml-2 py-2.5 pb-[11px] px-2.5 pl-3 dark:bg-gray-800 dark:border-gray-900 rounded-lg text-stone-50 font-medium hover:bg-gray-700 drop-shadow-sm"
           >
             <Image
-              className="rotate-[-45deg]"
+              className="rotate-[-35deg]"
               src={Send}
-              height={20}
+              height={18}
               alt={""}
             />
           </button>
