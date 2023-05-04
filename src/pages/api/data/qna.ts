@@ -64,7 +64,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
         const qnas = await QnA.find(); // data from database
         
-        const ret = getOutput(string, qnas, algo);
+        const [method, ret] = getOutput(string, qnas, algo);
+        // METHOD
+        // none: kalkulator, tanggal, hapus tapi tidak ditemukan
+        // get: searchdatabase
+        // delete
+        // add
+        // update
 
         return res.status(200).json({
             success: true,
@@ -101,7 +107,7 @@ function searchDatabase(query: string, data: QAObject[], algo: string): QAObject
     let bestMatch: QAObject | undefined, exactMatch: QAObject | undefined;
     const q = query;
     query = query.toLowerCase().replace(/[^\w\s]|_/g, '');
-    console.log(query);
+    // console.log(query);
 
     for (const obj of data) {
         const question: string = obj.question.toLowerCase().replace(/[^\w\s]|_/g, '');
@@ -112,8 +118,6 @@ function searchDatabase(query: string, data: QAObject[], algo: string): QAObject
         }
 
         const score: number = similarityPercentage(query, question);
-        // console.log(question);
-        // console.log(score);
         if (score >= maxScore) {
             maxScore = score;
             bestMatch = obj;
@@ -134,13 +138,16 @@ function searchDatabase(query: string, data: QAObject[], algo: string): QAObject
     return result;
 }
 
-// FUNGSI TAMBAH PERTANYAAN
-// async function addData(q: string, a: string): void {
-//     const newQnA: QAObject = { _id: "", question: q, answer: a, __v: 0 };
-//     const result = await QnA.insertOne(newQnA);
-//     console.log(result);
-// }
-
+// NGECEK PERTANYAAN ADA DALAM DATABASE ATAU TIDAK
+function checkExist(que: string, data: QAObject[], algo: string): string | undefined {
+    que = que.toLowerCase().replace(/[^\w\s]|_/g, '');
+    for (const obj of data) {
+        const question: string = obj.question.toLowerCase().replace(/[^\w\s]|_/g, '');
+        if (matchPattern(algo, question, que)) {
+            return obj.question;
+        }
+    }
+}
 
 
 // FUNGSI BUAT KMP / BM
@@ -275,34 +282,37 @@ function similarityPercentage(s1: string, s2: string): number {
 
 // FITUR TANGGAL
 function getDayFromDate(input: string): string {
-  const days = ['Minggu', 'Senin', 'Selasa',                 
-              'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-  const months = [' Januari ', ' Februari ', ' Maret ', ' April ',
-                   ' Mei ', ' Juni ', ' Juli ', ' Agustus ',
-                   ' September ', ' Oktober ', ' November ', ' Desember '];
+    const days =    ['Minggu', 'Senin', 'Selasa',                 
+                    'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const months =  [' Januari ', ' Februari ', ' Maret ', ' April ',
+                    ' Mei ', ' Juni ', ' Juli ', ' Agustus ',
+                    ' September ', ' Oktober ', ' November ', ' Desember '];
 
-  const parts = input.split('/');
+    const parts = input.split(/[\/\-\s]+/);
 
-  let year = parseInt(parts[2], 10);
-  const month = parseInt(parts[1], 10) - 1;
-  const day = parseInt(parts[0], 10);
-  const date = new Date(year, month, day);
+    let year = parseInt(parts[2], 10);
+    if (year < 100) {
+        year += year < 50 ? 2000 : 1901;
+    }
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[0], 10);
+    const date = new Date(year, month, day);
 
-  // Algoritma Zeller's Congruence
-  let h: number, q: number, m: number, k: number, j: number;
-  q = day;
-  m = month + 1;
-  if (m < 3) {
-      m += 12;
-      year--;
-  }
-  k = year % 100;
-  j = Math.floor(year / 100);
-  h = (q + Math.floor((13 * (m + 1)) / 5) + k + Math.floor(k / 4) + Math.floor(j / 4) + 5 * j - 1) % 7;
+    // Algoritma Zeller's Congruence
+    let h: number, q: number, m: number, k: number, j: number;
+    q = day;
+    m = month + 1;
+    if (m < 3) {
+        m += 12;
+        year--;
+    }
+    k = year % 100;
+    j = Math.floor(year / 100);
+    h = (q + Math.floor((13 * (m + 1)) / 5) + k + Math.floor(k / 4) + Math.floor(j / 4) + 5 * j - 1) % 7;
 
-  const msg = parts[0] + months[month] + parts[2] + " adalah Hari " + days[h];
+    const msg = parts[0] + months[month] + year.toString() + " adalah Hari " + days[h];
 
-  return msg;
+    return msg;
 }
 
 // FITUR KALKULATOR
@@ -379,52 +389,111 @@ function calculateMathExpression(expression: string): number | undefined {
   return stack[0];
 }
 
+function validateMathExpression(expression: string): boolean {
+    console.log(expression);
+    const mathRegex = /^(\d+|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+|\([^\(\)]*\)))*$/;
+    // Cari indeks kurung buka pertama
+    let openIndex = expression.indexOf('(');
+
+    // Jika tidak ditemukan, langsung validasi menggunakan regex
+    if (openIndex === -1) {
+        return mathRegex.test(expression);
+    }
+
+    // Cari indeks kurung tutup yang berpasangan dengan kurung buka pertama
+    let closeIndex = -1;
+    let openCount = 1;
+    for (let i = openIndex + 1; i < expression.length; i++) {
+        if (expression[i] === '(') {
+            openCount++;
+        } else if (expression[i] === ')') {
+            openCount--;
+            if (openCount === 0) {
+                closeIndex = i;
+                break;
+            }
+        }
+    }
+
+    // Jika tidak ditemukan kurung tutup yang berpasangan, invalid
+    if (closeIndex === -1) {
+        return false;
+    }
+
+    // Validasi substring di antara kurung, lalu rekursi untuk substring sebelum dan setelahnya
+    const insideParentheses = expression.slice(openIndex + 1, closeIndex);
+    const isValidInside = validateMathExpression(insideParentheses);
+    return isValidInside && mathRegex.test(expression);
+}
+
+
 
 // FUNGSI UTAMA
-function getOutput(input: string, data: QAObject[], algo: string): QAObject {
-  const regTanggal = /\b\d{1,2}\/\d{1,2}\/\d{4}\b/;
-  const matchTanggal = input.match(regTanggal);
-  const regCekMat = /\d+\s*[\+\-\*\/\^\(\)]\s*\d+/;
-  const regMat = /^.*\b(\d+|\([^\(\)]*\))(\s*[\+\-\*\/\^]\s*(\d+|\([^\(\)]*\)))+\b.*$/;
-  const regTambah = /^tambahkan pertanyaan\s(.+?)\sdengan jawaban\s(.+)$/;
-  const matchTambah = regTambah.exec(input);
-  const regHapus = /^hapus pertanyaan (.+)$/i;
-  const matchHapus = regHapus.exec(input);
+function getOutput(input: string, data: QAObject[], algo: string): [string, QAObject] {
+    const regTanggal = /\b\d{1,2}[\/\-\ ]\d{1,2}[\/\-\ ]\d{2}(?:\d{2})?\b/;
+    const matchTanggal = input.match(regTanggal);
+    const regCekMat = /\d+\s*[\+\-\*\/\^\(\)]\s*\d+/;
+    const regMat = /^(\d+|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+|\([^\(\)]*\)))*$/;
+    const regTambah = /^(tambahkan pertanyaan|tambah pertanyaan|tambahkan|tambah)\s(.+?)\s(dengan jawaban|jawaban|jawab)\s(.+)$/;
+    const matchTambah = regTambah.exec(input);
+    const regHapus = /^(hapus pertanyaan|hapus) (.+)$/i;
+    const matchHapus = regHapus.exec(input);
 
-  let result: QAObject = { _id: "", question: "", answer: "", __v: 0 };
-  console.log(input);
+    let result: QAObject = { _id: "", question: input, answer: "", __v: 0 };
+    let method: string;
 
-  if (matchTanggal) {
-      result.question = input;
-      result.answer = getDayFromDate(matchTanggal[0]);
-  } else if (regCekMat.test(input)) {
-      result.question = input;
-      const matchMat = input.replace(/[^0-9+\-*/()\^]/g,"").match(regMat);
-      if (!matchMat) {
-          result.answer = "Sintaks persamaan tidak valid"
-      }
-      else {
-          const res = calculateMathExpression(matchMat[0]);
-          let msg = "Hasil dari " + matchMat[0].replace(/\s+/g, "") + " adalah ";
-          if (res == undefined) {
-              msg +=  "tidak terdefinisi";
-          }
-          else {
-              msg += res.toString();
-          }
-          result.answer = msg;
-      }
-  } else if (matchTambah) {
-      // tambah pertanyaan
-  } else if (matchHapus) {
-      // hapus pertanyaan
-  }
-  else {
-      // search database
-      result = searchDatabase(input, data, algo);
-  }
+    if (matchTanggal) {
+        method = "none";
+        result.answer = getDayFromDate(matchTanggal[0]);
+    } else if (regCekMat.test(input)) {
+        method = "none";
+        const matchMat = input.replace(/[^0-9+\-*/()\^ ]/g,"").match(regMat);
+        
+        if (!validateMathExpression(input)) {
+            result.answer = "Sintaks persamaan tidak valid"
+        } else if (matchMat) {
+            console.log(matchMat[0]);
+            const res = calculateMathExpression(matchMat[0]);
+            let msg = "Hasil dari " + matchMat[0].replace(/\s+/g, "") + " adalah ";
+            if (res == undefined) {
+                msg +=  "tidak terdefinisi";
+            }
+            else {
+                msg += res.toString();
+            }
+            result.answer = msg;
+        }
+    } else if (matchTambah) {
+        const qAdd: string = matchTambah[2];
+        const aAdd: string = matchTambah[4];
+        const que = checkExist(qAdd, data, algo);
+        if (que) {
+            method = "update";
+            result.answer = "Pertanyaan \"" + que + "\" sudah ada! jawaban diupdate ke " + aAdd;
+        } else {
+            method = "add";
+            result.answer = "Pertanyaan \"" + qAdd + "\" telah ditambahkan!";
+        }
+    } else if (matchHapus) {
+        method = "delete";
+        const qDel: string = matchHapus[2];
+        const que = checkExist(qDel, data, algo);
+        if (que) {
+            method = "delete";
+            result.answer = "Pertanyaan \"" + que + "\" telah dihapus!";
+        }
+        else {
+            method = "none";
+            result.answer = "Pertanyaan \"" + qDel + "\" tidak ada dalam database!";
+        }
+        
+    }
+    else {
+        method = "get";
+        result = searchDatabase(input, data, algo);
+    }
 
-  return result;
+    return [method, result];
 }
 
 
