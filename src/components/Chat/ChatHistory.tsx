@@ -117,9 +117,9 @@ interface Chat {
     <div className="grid grid-cols-5 h-screen w-screen bg-gray-50 dark:bg-gray-900">
       <div className=" h-full w-full col-span-1 py-5 dark:bg-gray-800">
         <div className="flex flex-col w-full h-full items-center">
-          <div className="pl-5 pr-2 inner-shadow">
+          <div className="pl-5 pr-2 inner-shadow w-full">
             <div
-              className="items-center py-3 px-4 mr-[20px] w-[208px] border-2 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-600 rounded-lg text-white font-bold mb-5 cursor-pointer flex drop-shadow-sm"
+              className="items-center py-3 px-4 mr-[20px] border-2 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-600 rounded-lg text-white font-bold mb-5 cursor-pointer flex drop-shadow-sm"
               onClick={() => setRoom(chatData.length + 1)}
             >
               <Image src={Add} height={14} alt={""} />
