@@ -214,7 +214,7 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
                 />
               </div>
               <div className="grid grid-cols-3 gap-4 w-full px-32">
-                <div className="flex flex-col">
+                <div className="flex flex-col max-w-[232px]">
                   <div className="flex flex-col justify-center items-center h-full">
                     <Image src={QuestionMark} height={24} alt={""} />
                     <p className="text-lg text-stone-50 text-center pt-1">
@@ -262,7 +262,7 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
                   </div>
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col max-w-[232px]">
                   <div className="flex flex-col justify-center items-center h-full">
                     <Image src={Code} height={24} alt={""} />
                     <p className="text-lg text-stone-50 text-center pt-1">
@@ -298,7 +298,7 @@ const Conversation = ({ selectedAlgorithm, data, room, maxRoom, onChangeRoom }: 
                   </div>
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col max-w-[232px]">
                   <div className="flex flex-col justify-center items-center h-full">
                     <Image src={Warning} height={24} alt={""} />
                     <p className="text-lg text-stone-50 text-center pt-1">
