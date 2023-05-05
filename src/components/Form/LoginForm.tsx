@@ -33,7 +33,6 @@ const LoginForm = () => {
       } else {
         toast.success("Log in successful");
 
-        await new Promise((resolve) => setTimeout(resolve, 2000));
         router.push("/");
       }
     } catch (error) {
