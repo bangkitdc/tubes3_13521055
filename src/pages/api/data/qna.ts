@@ -106,10 +106,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             const execDel = regHapus.exec(question);
             
             if (execDel) {
-                question = execDel[2];
+                question = execDel[2].toLowerCase().replace(/[^\w\s]|_/g, '');
+            }
+            
+            let id:string = "";
+
+            const qnas = await QnA.find();
+            for (const obj of qnas) {
+                const que: string = obj.question.toLowerCase().replace(/[^\w\s]|_/g, '');
+                if (matchPattern(algo, question, que)) {
+                    id = obj._id;
+                }
             }
 
-            const messageExists = await QnA.findOne({ question: question });
+            const messageExists = await QnA.findOne({ _id: id });
 
             if (messageExists) { // if exist, delete
                 await messageExists.deleteOne();
@@ -470,7 +480,7 @@ function calculateMathExpression(expression: string): number | undefined {
 
 // validasi persamaan matematika
 function validateMathExpression(expression: string): boolean {
-    const mathRegex = /^\s*(\d+|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+|\([^\(\)]*\)))*\s*$/;
+    const mathRegex = /(\d+|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+|\([^\(\)]*\)))*/;
     // Cari indeks kurung buka pertama
     let openIndex = expression.indexOf('(');
 
@@ -525,7 +535,7 @@ function getOutput(input: string, data: QAObject[], algo: string): [string, QAOb
     const regTanggal = /\b\d{1,2}[\/\-\ ]\d{1,2}[\/\-\ ]\d{2}(?:\d{2})?\b/;
     const matchTanggal = input.match(regTanggal);
     const regCekMat = /\d+\s*[\+\-\*\/\^\(\)]\s*\d+/;
-    const regMat = /^\s*(\d+|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+|\([^\(\)]*\)))*\s*$/;
+    const regMat = /(\d+|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+|\([^\(\)]*\)))*/;
     const regTambah = /^(tambahkan pertanyaan|tambah pertanyaan|tambahkan|tambah)\s(.+?)\s(dengan jawaban|jawaban|jawab)\s(.+)$/;
     const matchTambah = regTambah.exec(input);
     const regHapus = /^(hapus pertanyaan|hapus) (.+)$/i;
@@ -544,22 +554,26 @@ function getOutput(input: string, data: QAObject[], algo: string): [string, QAOb
     // input format kalkulator
     else if (regCekMat.test(input)) {
         method = "none";
-        const matchMat = input.replace(/[^0-9+\-*/()\^ ]/g,"").match(regMat);
+        const matchMat = input.replace(/[^0-9+\-*/()\^]/g,"").match(regMat);
         
-        // validasi sintaks persamaan
-        if (!validateMathExpression(input)) {
-            result.answer = "Sintaks persamaan tidak valid"
-        } else if (matchMat) {
-            // kalkulasi ekspresi jika sintaks valid
-            const res = calculateMathExpression(matchMat[0]);
-            let msg = "Hasil dari " + matchMat[0].replace(/\s+/g, "") + " adalah ";
-            if (res == undefined) {
-                msg +=  "tidak terdefinisi";
+        if (matchMat) {
+            console.log(matchMat[0])
+            if (!validateMathExpression(matchMat[0])) {
+                result.answer = "Sintaks persamaan tidak valid"
             }
             else {
-                msg += res.toString();
+                // kalkulasi ekspresi jika sintaks valid
+                const res = calculateMathExpression(matchMat[0]);
+                let msg = "Hasil dari " + matchMat[0].replace(/\s+/g, "") + " adalah ";
+                if (res == undefined) {
+                    msg +=  "tidak terdefinisi";
+                }
+                else {
+                    msg += res.toString();
+                }
+                result.answer = msg;
             }
-            result.answer = msg;
+            
         }
     } 
     
@@ -572,7 +586,7 @@ function getOutput(input: string, data: QAObject[], algo: string): [string, QAOb
         // update jawaban jika pertanyaan sudah ada
         if (que) {
             method = "update";
-            result.answer = "Pertanyaan \"" + que + "\" sudah ada! jawaban diupdate ke " + aAdd;
+            result.answer = "Pertanyaan \"" + que + "\" sudah ada! jawaban diupdate ke \"" + aAdd + "\"";
         } 
         // tambah pertanyaan dan jawaban jika pertanyaan belum ada
         else {
