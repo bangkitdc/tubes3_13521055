@@ -1,5 +1,9 @@
 # boleeehhh
 
+<p align="center">
+    <img src="https://github.com/bangkitdc/tubes3_13521055/blob/main/public/boleeehhh.gif" width=800>
+</p>
+
 ## Brief Description
 AI Chatbot that uses string matching algorithm, KMP and BM. This application is designed to understand and generate human-like responses to a wide range of questions and prompts.
 
