@@ -156,8 +156,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-
-
 interface QAObject {
     _id: string;
     question: string;
@@ -554,8 +552,6 @@ function checkExist(que: string, data: QAObject[], algo: string): string | undef
         }
     }
 }
-
-
 
 // FUNGSI UTAMA
 function getOutput(input: string, data: QAObject[], algo: string): [string, QAObject] {

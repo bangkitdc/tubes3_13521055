@@ -125,8 +125,9 @@ const Conversation = ({ selectedAlgorithm, room, maxRoom, onChangeRoom }: Conver
           sender: session?.user._id,
           room: room == 0 ? maxRoom : room,
           role: "receiver",
-          text: apiRes.data.ret.answer.trim(),
+          text: apiRes.data.ret.answer,
         };
+
         if (!isFinite(dataPost.room)) {
           dataPost.room = 1;
           onChangeRoom();
