@@ -549,7 +549,7 @@ function checkExist(que: string, data: QAObject[], algo: string): string | undef
     que = que.toLowerCase().replace(/[^\w\s]|_/g, '');
     for (const obj of data) {
         const question: string = obj.question.toLowerCase().replace(/[^\w\s]|_/g, '');
-        if (matchPattern(algo, question, que)) {
+        if (matchPattern(algo, que, question)) {
             return obj.question;
         }
     }
