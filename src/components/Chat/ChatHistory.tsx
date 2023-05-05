@@ -77,7 +77,7 @@ interface Chat {
     const [flag, setFlag] = useState(false);
 
     const handleChangeRoom = () => {
-      setFlag(true);
+      setFlag(!flag);
     };
 
     const [room, setRoom] = useState(() => {
@@ -105,9 +105,16 @@ interface Chat {
         if (apiRes?.data?.success) {
           localStorage.removeItem("room");
 
-          setTimeout(() => {
-            setRoom(Math.max(...allRooms) + 1);
-          }, 100);
+          if (room == Math.max(...allRooms)) {
+            setTimeout(() => {
+              setRoom(0);
+            }, 200);
+            setRoom(Math.max(...allRooms));
+          } else {
+            setTimeout(() => {
+              setRoom(Math.max(...allRooms) + 1);
+            }, 100);
+          }
 
           // setRoom(0);
         }

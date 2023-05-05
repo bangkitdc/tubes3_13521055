@@ -128,6 +128,7 @@ const Conversation = ({ selectedAlgorithm, room, maxRoom, onChangeRoom }: Conver
         };
         if (!isFinite(dataPost.room)) {
           dataPost.room = 1;
+          onChangeRoom();
         }
 
         setBotMessages([...botMessages, dataPost]);
