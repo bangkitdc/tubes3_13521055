@@ -31,8 +31,11 @@ const LoginForm = () => {
       if (loginRes && !loginRes.ok) {
         toast.error(loginRes.error);
       } else {
-        toast.success("Log in successful");
+        toast.success("Log in successful", {
+          autoClose: 2000,
+        });
 
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         router.push("/");
       }
     } catch (error) {
