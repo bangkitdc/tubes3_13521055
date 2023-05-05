@@ -88,9 +88,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                     .json({ error: "Question should be at least 1 characters long" });
             }
 
-            const messageExists = await QnA.findOne({ question });
+            let messageExists;
+            const qnas = await QnA.find();
+            if (method === "update") {
+                for (const obj of qnas) {
+                    const que: string = obj.question.toLowerCase().replace(/[^\w\s]|_/g, '');
+                    if (matchPattern(algo, question, que)) {
+                        messageExists = obj;
+                    }
+                }
+            }
+
 
             if (messageExists) { // if exist, update instead
+                messageExists.question = question;
                 messageExists.answer = answer;
                 await messageExists.save();
             } else {
@@ -463,13 +474,13 @@ function calculateMathExpression(expression: string): number | undefined {
     for (let i = 0; i < expression.length; i++) {
         const token = expression[i];
     
-        if (/\d/.test(token)) {
+        if (/[\d\.]/.test(token)) {
             let number = token;
-            while (/\d/.test(expression[i + 1])) {
+            while (/[\d\.]/.test(expression[i + 1])) {
                 i++;
                 number += expression[i];
             }
-            stack.push(parseInt(number));
+            stack.push(parseFloat(number));
         } else if (token === '(') {
             operators.push(token);
         } else if (token === ')') {
@@ -490,12 +501,15 @@ function calculateMathExpression(expression: string): number | undefined {
         evaluateExpression(operators.pop(), stack.pop(), stack.pop());
     }
 
+    if (stack[0] != parseFloat(stack[0].toFixed(4))) {
+        stack[0] = parseFloat(stack[0].toFixed(4));
+    }
     return stack[0];
 }
 
 // validasi persamaan matematika
 function validateMathExpression(expression: string): boolean {
-    const mathRegex = /(\d+|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+|\([^\(\)]*\)))*/;
+    const mathRegex = /(\d+(\.\d+)?|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+(\.\d+)?|\([^\(\)]*\)))*/;
     // Cari indeks kurung buka pertama
     let openIndex = expression.indexOf('(');
 
@@ -550,7 +564,7 @@ function getOutput(input: string, data: QAObject[], algo: string): [string, QAOb
     const regTanggal = /\b\d{1,2}[\/\-\ ]\d{1,2}[\/\-\ ]\d{2}(?:\d{2})?\b/;
     const matchTanggal = input.match(regTanggal);
     const regCekMat = /\d+\s*[\+\-\*\/\^\(\)]\s*\d+/;
-    const regMat = /(\d+|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+|\([^\(\)]*\)))*/;
+    const regMat = /(\d+(\.\d+)?|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+(\.\d+)?|\([^\(\)]*\)))*/;
     const regTambah = /^(tambahkan pertanyaan|tambah pertanyaan|tambahkan|tambah)\s(.+?)\s(dengan jawaban|jawaban|jawab)\s(.+)$/;
     const matchTambah = regTambah.exec(input);
     const regHapus = /^(hapus pertanyaan|hapus) (.+)$/i;
@@ -569,10 +583,9 @@ function getOutput(input: string, data: QAObject[], algo: string): [string, QAOb
     // input format kalkulator
     else if (regCekMat.test(input)) {
         method = "none";
-        const matchMat = input.replace(/[^0-9+\-*/()\^]/g,"").match(regMat);
+        const matchMat = input.replace(/[^0-9+\-*/().\^]/g,"").match(regMat);
         
         if (matchMat) {
-            console.log(matchMat[0])
             if (!validateMathExpression(matchMat[0])) {
                 result.answer = "Sintaks persamaan tidak valid"
             }
