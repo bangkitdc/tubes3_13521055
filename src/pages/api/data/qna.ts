@@ -385,23 +385,38 @@ function getDayFromDate(input: string): string {
     }
     const month = parseInt(parts[1], 10) - 1;
     const day = parseInt(parts[0], 10);
-    const date = new Date(year, month, day);
+    
+    if (!validateDate(day, month+1, year)) {
+        return "Tanggal tidak valid";
+    }
 
     // Algoritma Zeller's Congruence
-    let h: number, q: number, m: number, k: number, j: number;
-    q = day;
+    let h: number, d: number, m: number, y: number, k: number, j: number;
+    d = day;
     m = month + 1;
+    y = year;
     if (m < 3) {
         m += 12;
-        year--;
+        y--;
     }
-    k = year % 100;
-    j = Math.floor(year / 100);
-    h = (q + Math.floor((13 * (m + 1)) / 5) + k + Math.floor(k / 4) + Math.floor(j / 4) + 5 * j - 1) % 7;
+    k = y % 100;
+    j = Math.floor(y / 100);
+    h = (d + Math.floor((13 * (m + 1)) / 5) + k + Math.floor(k / 4) + Math.floor(j / 4) + 5 * j - 1) % 7;
 
     const msg = parts[0] + months[month] + year.toString() + " adalah Hari " + days[h];
 
     return msg;
+}
+
+// VALIDASI TANGGAL
+function validateDate(date: number, month: number, year: number): boolean {
+    if (month < 1 || month > 12) {
+        return false;
+    }
+
+    const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    const maxDays = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    return date > 0 && date <= maxDays[month - 1];
 }
 
 // FITUR KALKULATOR
