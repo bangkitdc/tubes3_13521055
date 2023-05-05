@@ -88,9 +88,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                     .json({ error: "Question should be at least 1 characters long" });
             }
 
-            const messageExists = await QnA.findOne({ question });
+            let messageExists;
+            const qnas = await QnA.find();
+            if (method === "update") {
+                for (const obj of qnas) {
+                    const que: string = obj.question.toLowerCase().replace(/[^\w\s]|_/g, '');
+                    if (matchPattern(algo, question, que)) {
+                        messageExists = obj;
+                    }
+                }
+            }
+
 
             if (messageExists) { // if exist, update instead
+                messageExists.question = question;
                 messageExists.answer = answer;
                 await messageExists.save();
             } else {
@@ -495,7 +506,7 @@ function calculateMathExpression(expression: string): number | undefined {
 
 // validasi persamaan matematika
 function validateMathExpression(expression: string): boolean {
-    const mathRegex = /(\d+|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+|\([^\(\)]*\)))*/;
+    const mathRegex = /(\d+(\.\d+)?|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+(\.\d+)?|\([^\(\)]*\)))*/;
     // Cari indeks kurung buka pertama
     let openIndex = expression.indexOf('(');
 
@@ -550,7 +561,7 @@ function getOutput(input: string, data: QAObject[], algo: string): [string, QAOb
     const regTanggal = /\b\d{1,2}[\/\-\ ]\d{1,2}[\/\-\ ]\d{2}(?:\d{2})?\b/;
     const matchTanggal = input.match(regTanggal);
     const regCekMat = /\d+\s*[\+\-\*\/\^\(\)]\s*\d+/;
-    const regMat = /(\d+|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+|\([^\(\)]*\)))*/;
+    const regMat = /(\d+(\.\d+)?|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+(\.\d+)?|\([^\(\)]*\)))*/;
     const regTambah = /^(tambahkan pertanyaan|tambah pertanyaan|tambahkan|tambah)\s(.+?)\s(dengan jawaban|jawaban|jawab)\s(.+)$/;
     const matchTambah = regTambah.exec(input);
     const regHapus = /^(hapus pertanyaan|hapus) (.+)$/i;
@@ -572,7 +583,6 @@ function getOutput(input: string, data: QAObject[], algo: string): [string, QAOb
         const matchMat = input.replace(/[^0-9+\-*/()\^]/g,"").match(regMat);
         
         if (matchMat) {
-            console.log(matchMat[0])
             if (!validateMathExpression(matchMat[0])) {
                 result.answer = "Sintaks persamaan tidak valid"
             }
