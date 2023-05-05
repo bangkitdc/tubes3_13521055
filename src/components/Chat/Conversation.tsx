@@ -10,6 +10,7 @@ import Send from "@/../public/icons/send.svg";
 import QuestionMark from "@/../public/icons/question_mark.svg";
 import Code from "@/../public/icons/code.svg";
 import Warning from "@/../public/icons/warning_amber.svg";
+import debounce from "lodash";
 
 interface ConversationProps {
   selectedAlgorithm: string;
@@ -58,11 +59,6 @@ const Conversation = ({ selectedAlgorithm, room, maxRoom, onChangeRoom }: Conver
     };
     fetchData();
   }, [room, session?.user?._id]);
-  
-  function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setCurrentMessage(event.target.value);
-    onChangeRoom();
-  }
 
   useEffect(() => {
     setTimeout(() => {
@@ -72,7 +68,7 @@ const Conversation = ({ selectedAlgorithm, room, maxRoom, onChangeRoom }: Conver
       }
     }, 1000);
   }, [room]);
-
+  
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -107,6 +103,11 @@ const Conversation = ({ selectedAlgorithm, room, maxRoom, onChangeRoom }: Conver
         sendMessage();
       }
     }
+  }
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onChangeRoom();
+    setCurrentMessage(event.target.value);
   }
 
   const sendMessage = async () => {
