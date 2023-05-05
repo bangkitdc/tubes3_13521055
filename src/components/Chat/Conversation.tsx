@@ -124,13 +124,14 @@ const Conversation = ({ selectedAlgorithm, room, maxRoom, onChangeRoom }: Conver
           sender: session?.user._id,
           room: room == 0 ? maxRoom : room,
           role: "receiver",
-          text: apiRes.data.ret.answer,
+          text: apiRes.data.ret.answer.trim(),
         };
         if (!isFinite(dataPost.room)) {
           dataPost.room = 1;
         }
+
         setBotMessages([...botMessages, dataPost]);
-        
+
         const apiPost = await axios.post("/api/chat/message", dataPost);
         if (apiPost?.data?.success) {
         }
