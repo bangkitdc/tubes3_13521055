@@ -63,8 +63,12 @@ const SignupForm = () => {
           if (loginRes && !loginRes.ok) {
             toast.error(loginRes.error);
           } else {
+            toast.success("Sign up successful", {
+              autoClose: 1000,
+            });
+
+            await new Promise((resolve) => setTimeout(resolve, 2000));
             router.push("/");
-            toast.success("Sign up successful");
           }
         }
       } catch (error: unknown) {

@@ -1,8 +1,7 @@
 import { getSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
 import ChatHistory from '../components/Chat/ChatHistory'
 import { GetServerSidePropsContext } from "next";
+import { ToastContainer } from "react-toastify";
 
 export const getServerSideProps = async (context : GetServerSidePropsContext ) => {
   const session = await getSession(context);
@@ -34,10 +33,9 @@ export const getServerSideProps = async (context : GetServerSidePropsContext ) =
 
 export default function Home() {
   return (
-    <>
-      <div>
-        <ChatHistory/>
-      </div>
-    </>
+    <div>
+      <ToastContainer />
+      <ChatHistory />
+    </div>
   );
 }

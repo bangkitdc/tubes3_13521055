@@ -1,8 +1,14 @@
 import React from "react";
 import SignupForm from "../components/Form/SignupForm";
+import { ToastContainer } from "react-toastify";
 
 const signup = () => {
-  return <SignupForm />;
+  return (
+    <div>
+      <ToastContainer />
+      <SignupForm />
+    </div>
+  );
 };
 
 export default signup;
