@@ -123,12 +123,13 @@ interface Chat {
     useEffect(() => {
       if (isMounted) {
         if (allRooms.length !== 0) {
+          console.log(room);
           if (room != Math.max(...allRooms)) {
             if (room == 0) {
               setRoom(Math.max(...allRooms) + 1);
             }
           } else {
-            setRoom(Math.max(...allRooms) + 1);
+            setRoom(Math.max(...allRooms));
           }
         } else {
           setRoom(1);
