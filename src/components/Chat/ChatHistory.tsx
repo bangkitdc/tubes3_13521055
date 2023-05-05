@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import Conversation from './Conversation';
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, all } from 'axios';
 import { signOut, useSession } from 'next-auth/react';
 import { toast } from "react-toastify";
 import { Message } from '@/types';
@@ -77,7 +77,7 @@ interface Chat {
     const [flag, setFlag] = useState(false);
 
     const handleChangeRoom = () => {
-      setFlag(true);
+      setFlag(!flag);
     };
 
     const [room, setRoom] = useState(() => {
@@ -105,9 +105,16 @@ interface Chat {
         if (apiRes?.data?.success) {
           localStorage.removeItem("room");
 
-          setTimeout(() => {
-            setRoom(Math.max(...allRooms) + 1);
-          }, 100);
+          if (room == Math.max(...allRooms)) {
+            setTimeout(() => {
+              setRoom(0);
+            }, 200);
+            setRoom(Math.max(...allRooms));
+          } else {
+            setTimeout(() => {
+              setRoom(Math.max(...allRooms) + 1);
+            }, 100);
+          }
 
           // setRoom(0);
         }
@@ -122,7 +129,18 @@ interface Chat {
 
     useEffect(() => {
       if (isMounted) {
-        setRoom(allRooms.length !== 0 ? Math.max(...allRooms) + 1 : 1);
+        if (allRooms.length !== 0) {
+          if (room != Math.max(...allRooms)) {
+            if (room == 0) {
+              setRoom(Math.max(...allRooms) + 1);
+            }
+          } else {
+            setRoom(Math.max(...allRooms));
+          }
+        } else {
+          setRoom(1);
+        }
+        // setRoom(allRooms.length !== 0 ? Math.max(...allRooms) : 1);
       } else {
         setIsMounted(true);
       }
