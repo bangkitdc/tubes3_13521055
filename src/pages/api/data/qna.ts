@@ -73,7 +73,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // update
         
         if (method === "add" || method === "update") {
-            const regTambah = /^(tambahkan pertanyaan|tambah pertanyaan|tambahkan|tambah)\s(.+?)\s(dengan jawaban|jawaban|jawab)\s(.+)$/;
+            const regTambah = /^(tambahkan pertanyaan|tambah pertanyaan|tambahkan|tambah)\s(.+?)\s(dengan jawaban|jawaban|jawab)\s(.+)$/i;
             let question = ret.question;
             let answer = ret.answer;
             const exec = regTambah.exec(question);
@@ -565,7 +565,7 @@ function getOutput(input: string, data: QAObject[], algo: string): [string, QAOb
     const matchTanggal = input.match(regTanggal);
     const regCekMat = /\d+\s*[\+\-\*\/\^\(\)]\s*\d+/;
     const regMat = /(\d+(\.\d+)?|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+(\.\d+)?|\([^\(\)]*\)))*/;
-    const regTambah = /^(tambahkan pertanyaan|tambah pertanyaan|tambahkan|tambah)\s(.+?)\s(dengan jawaban|jawaban|jawab)\s(.+)$/;
+    const regTambah = /^(tambahkan pertanyaan|tambah pertanyaan|tambahkan|tambah)\s(.+?)\s(dengan jawaban|jawaban|jawab)\s(.+)$/i;
     const matchTambah = regTambah.exec(input);
     const regHapus = /^(hapus pertanyaan|hapus) (.+)$/i;
     const matchHapus = regHapus.exec(input);
