@@ -474,13 +474,13 @@ function calculateMathExpression(expression: string): number | undefined {
     for (let i = 0; i < expression.length; i++) {
         const token = expression[i];
     
-        if (/\d/.test(token)) {
+        if (/[\d\.]/.test(token)) {
             let number = token;
-            while (/\d/.test(expression[i + 1])) {
+            while (/[\d\.]/.test(expression[i + 1])) {
                 i++;
                 number += expression[i];
             }
-            stack.push(parseInt(number));
+            stack.push(parseFloat(number));
         } else if (token === '(') {
             operators.push(token);
         } else if (token === ')') {
@@ -501,6 +501,9 @@ function calculateMathExpression(expression: string): number | undefined {
         evaluateExpression(operators.pop(), stack.pop(), stack.pop());
     }
 
+    if (stack[0] != parseFloat(stack[0].toFixed(4))) {
+        stack[0] = parseFloat(stack[0].toFixed(4));
+    }
     return stack[0];
 }
 
@@ -580,7 +583,7 @@ function getOutput(input: string, data: QAObject[], algo: string): [string, QAOb
     // input format kalkulator
     else if (regCekMat.test(input)) {
         method = "none";
-        const matchMat = input.replace(/[^0-9+\-*/()\^]/g,"").match(regMat);
+        const matchMat = input.replace(/[^0-9+\-*/().\^]/g,"").match(regMat);
         
         if (matchMat) {
             if (!validateMathExpression(matchMat[0])) {
