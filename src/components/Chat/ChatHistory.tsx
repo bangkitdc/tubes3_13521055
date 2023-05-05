@@ -159,8 +159,9 @@ interface Chat {
                       {chat.label}
                     </Link>
                     {room == convertToNumber(chat.label) && (
-                      <button className="hover:bg-gray-700 rounded-2xl"
-                      onClick={handleDeleteRoom}
+                      <button
+                        className="hover:bg-gray-700 rounded-2xl"
+                        onClick={handleDeleteRoom}
                       >
                         <Image src={Delete} height={28} alt={""} />
                       </button>
@@ -208,7 +209,7 @@ interface Chat {
             </div>
             <div className="w-full pt-2 relative drop-shadow-sm pl-5 pr-7">
               {isDropdownOpen && (
-                <div className="absolute bottom-[52px] z-30 drop-shadow-lg rounded-lg w-[208px] bg-gray-900">
+                <div className="absolute bottom-[52px] z-30 drop-shadow-lg rounded-lg w-[calc(100%-3rem)] bg-gray-900">
                   <div className="py-2">
                     <button
                       className="cursor-pointer flex w-full px-4 py-1 text-sm hover:bg-gray-600 text-gray-200"
