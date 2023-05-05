@@ -1,7 +1,7 @@
 # boleeehhh
 
 <p align="center">
-    <img src="https://github.com/bangkitdc/tubes3_13521055/blob/main/public/boleeehhh.gif" width=800>
+    <img src="https://github.com/bangkitdc/tubes3_13521055/blob/main/public/boleeehhh.gif" width=700>
 </p>
 
 ## Brief Description
