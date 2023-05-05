@@ -182,7 +182,7 @@ function searchDatabase(query: string, data: QAObject[], algo: string): QAObject
         const question: string = obj.question.toLowerCase().replace(/[^\w\s]|_/g, '');
 
         // jika pertanyaan cocok dengan pola, maka assign object sebagai exactmatch
-        if (matchPattern(algo, query, question)) {
+        if (matchPattern(algo, query, question) && query.length === question.length) {
             exactMatch = obj;
             break;
         }
@@ -549,7 +549,7 @@ function checkExist(que: string, data: QAObject[], algo: string): string | undef
     que = que.toLowerCase().replace(/[^\w\s]|_/g, '');
     for (const obj of data) {
         const question: string = obj.question.toLowerCase().replace(/[^\w\s]|_/g, '');
-        if (matchPattern(algo, que, question)) {
+        if (matchPattern(algo, que, question) && que.length === question.length) {
             return obj.question;
         }
     }
