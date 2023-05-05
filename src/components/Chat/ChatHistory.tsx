@@ -122,7 +122,7 @@ interface Chat {
 
     useEffect(() => {
       if (isMounted) {
-        setRoom(allRooms.length !== 0 ? Math.max(...allRooms) + 1 : 0);
+        setRoom(allRooms.length !== 0 ? Math.max(...allRooms) + 1 : 1);
       } else {
         setIsMounted(true);
       }
