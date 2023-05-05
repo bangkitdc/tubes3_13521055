@@ -32,7 +32,7 @@ const LoginForm = () => {
         toast.error(loginRes.error);
       } else {
         toast.success("Log in successful", {
-          autoClose: 1500,
+          autoClose: 1000,
         });
 
         await new Promise((resolve) => setTimeout(resolve, 2000));
