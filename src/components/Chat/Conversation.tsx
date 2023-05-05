@@ -81,7 +81,7 @@ const Conversation = ({ selectedAlgorithm, room, maxRoom, onChangeRoom }: Conver
 
       let dataPost: Message = {
         sender: session?.user._id,
-        room: room == 0 ? maxRoom + 1 : room,
+        room: room == 0 ? maxRoom : room,
         role: "sender",
         text: currentMessage,
       };
@@ -122,7 +122,7 @@ const Conversation = ({ selectedAlgorithm, room, maxRoom, onChangeRoom }: Conver
       if (apiRes?.data?.success) {
         let dataPost: Message = {
           sender: session?.user._id,
-          room: room == 0 ? maxRoom + 1 : room,
+          room: room == 0 ? maxRoom : room,
           role: "receiver",
           text: apiRes.data.ret.answer,
         };

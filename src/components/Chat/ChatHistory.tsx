@@ -106,10 +106,10 @@ interface Chat {
           localStorage.removeItem("room");
 
           setTimeout(() => {
-            setRoom(Math.max(...allRooms));
+            setRoom(Math.max(...allRooms) + 1);
           }, 100);
 
-          setRoom(0);
+          // setRoom(0);
         }
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -118,10 +118,15 @@ interface Chat {
         }
       }
     };
+    const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
-        setRoom(allRooms.length != 0 ? Math.max(...allRooms) + 1 : 0);
-          // eslint-disable-next-line react-hooks/exhaustive-deps
+      if (isMounted) {
+        setRoom(allRooms.length !== 0 ? Math.max(...allRooms) + 1 : 0);
+      } else {
+        setIsMounted(true);
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [flag]);
 
   return (
@@ -147,7 +152,7 @@ interface Chat {
                 .map((chat) => (
                   <div
                     className={`py-3 px-4 border-2 ${
-                      room == convertToNumber(chat.label)
+                      (room == convertToNumber(chat.label))
                         ? "dark:bg-gray-600"
                         : "dark:bg-gray-800"
                     } dark:border-gray-700 hover:bg-gray-600 rounded-lg text-white font-bold mb-3 w-full flex cursor-pointer drop-shadow-sm`}
