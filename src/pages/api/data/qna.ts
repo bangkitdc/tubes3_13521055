@@ -182,7 +182,7 @@ function searchDatabase(query: string, data: QAObject[], algo: string): QAObject
         const question: string = obj.question.toLowerCase().replace(/[^\w\s]|_/g, '');
 
         // jika pertanyaan cocok dengan pola, maka assign object sebagai exactmatch
-        if (matchPattern(algo, question, query)) {
+        if (matchPattern(algo, query, question)) {
             exactMatch = obj;
             break;
         }
