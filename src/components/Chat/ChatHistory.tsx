@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import Conversation from './Conversation';
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, all } from 'axios';
 import { signOut, useSession } from 'next-auth/react';
 import { toast } from "react-toastify";
 import { Message } from '@/types';
@@ -122,7 +122,18 @@ interface Chat {
 
     useEffect(() => {
       if (isMounted) {
-        setRoom(allRooms.length !== 0 ? Math.max(...allRooms) : 1);
+        if (allRooms.length !== 0) {
+          if (room != Math.max(...allRooms)) {
+            if (room == 0) {
+              setRoom(Math.max(...allRooms) + 1);
+            }
+          } else {
+            setRoom(Math.max(...allRooms) + 1);
+          }
+        } else {
+          setRoom(1);
+        }
+        // setRoom(allRooms.length !== 0 ? Math.max(...allRooms) : 1);
       } else {
         setIsMounted(true);
       }
