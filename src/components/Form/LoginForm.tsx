@@ -35,7 +35,7 @@ const LoginForm = () => {
           autoClose: 1000,
         });
 
-        // await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1500));
         router.push("/");
       }
     } catch (error) {
