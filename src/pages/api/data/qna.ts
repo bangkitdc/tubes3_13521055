@@ -491,6 +491,9 @@ function calculateMathExpression(expression: string): number | undefined {
             while (operators.length > 0 && operators[operators.length - 1] !== '(' && currentPrecedence <= precedence[operators[operators.length - 1]]) {
                 evaluateExpression(operators.pop(), stack.pop(), stack.pop());
             }
+            if (token == '-' && (stack.length === 0 || operators[operators.length - 1] === '(')) {
+                stack.push(0);
+            }
             operators.push(token);
         }
     }
@@ -507,7 +510,7 @@ function calculateMathExpression(expression: string): number | undefined {
 
 // validasi persamaan matematika
 function validateMathExpression(expression: string): boolean {
-    const mathRegex = /(\d+(\.\d+)?|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+(\.\d+)?|\([^\(\)]*\)))*/;
+    const mathRegex = /(\-+\s*)?(\d+(\.\d+)?|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\-+\s*)?(\d+(\.\d+)?|\([^\(\)]*\)))*/;
     // Cari indeks kurung buka pertama
     let openIndex = expression.indexOf('(');
 
@@ -559,8 +562,8 @@ function getOutput(input: string, data: QAObject[], algo: string): [string, QAOb
     // regex untuk menentukan format pertanyaan
     const regTanggal = /\b\d{1,2}[\/\-\ ]\d{1,2}[\/\-\ ]\d{2}(?:\d{2})?\b/;
     const matchTanggal = input.match(regTanggal);
-    const regCekMat = /\d+\s*[\+\-\*\/\^\(\)]\s*\d+/;
-    const regMat = /(\d+(\.\d+)?|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\d+(\.\d+)?|\([^\(\)]*\)))*/;
+    const regCekMat = /[\d\)]+\s*[\+\-\*\/\^\(\)]\s*[\d\(]+/;
+    const regMat = /(\-+\s*)?(\d+(\.\d+)?|\([^\(\)]*\))(?:\s*[\+\-\*\/\^]\s*(\-+\s*)?(\d+(\.\d+)?|\([^\(\)]*\)))*/;
     const regTambah = /^(tambahkan pertanyaan|tambah pertanyaan|tambahkan|tambah)\s(.+?)\s(dengan jawaban|jawaban|jawab)\s(.+)$/i;
     const matchTambah = regTambah.exec(input);
     const regHapus = /^(hapus pertanyaan|hapus) (.+)$/i;
